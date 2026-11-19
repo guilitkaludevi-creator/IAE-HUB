@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d122b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="CADR'EMS - Boîte à Outils Complète & Cockpit du Futur Dirigeant d'Établissement Sanitaire et Médico-Social en France.">
+  <title>CADR'EMS · Le Cockpit du Dirigeant de Santé</title>
+
+  <!-- Polices Google & Icônes FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Three.js pour le Graph 3D WebGL -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Feuille de styles personnalisée Liquid Glass -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Aurora Background animé -->
+  <div class="aurora-bg">
+    <div class="aurora-orb orb-1"></div>
+    <div class="aurora-orb orb-2"></div>
+    <div class="aurora-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header Liquid Glass -->
+    <header class="glass-header">
+      <div class="brand-wrapper" onclick="App.switchView('etablissements')">
+        <div class="brand-logo-gem">
+          <i class="fa-solid fa-staff-snake"></i>
+        </div>
+        <div class="brand-text">
+          <h1>CADR'EMS</h1>
+          <div class="brand-sub">
+            <span class="live-pulse-dot"></span>
+            <span>Master MES · Système FR</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="search-input-pill">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search-input" placeholder="Rechercher sigle, loi, acteur..." enterkeyhint="search" autocomplete="off">
+        </div>
+        <button class="theme-toggle-btn" id="theme-toggle" aria-label="Changer de thème">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Barre de Navigation Pills Horizontale -->
+    <nav class="nav-pills-bar">
+      <button class="nav-pill active" data-view="etablissements">
+        <i class="fa-solid fa-hospital"></i><span>Établissements</span>
+      </button>
+      <button class="nav-pill" data-view="carrieres">
+        <i class="fa-solid fa-sitemap"></i><span>Métiers & Diplôme</span>
+      </button>
+      <button class="nav-pill" data-view="reunions">
+        <i class="fa-solid fa-comments"></i><span>Instances & Réunions</span>
+      </button>
+      <button class="nav-pill" data-view="documents">
+        <i class="fa-solid fa-file-signature"></i><span>Outils & Documents</span>
+      </button>
+      <button class="nav-pill" data-view="acteurs">
+        <i class="fa-solid fa-landmark"></i><span>Tutelles & Acteurs</span>
+      </button>
+      <button class="nav-pill" data-view="rh">
+        <i class="fa-solid fa-scale-balanced"></i><span>Boîte à Outils RH</span>
+      </button>
+      <button class="nav-pill" data-view="carte3d">
+        <i class="fa-solid fa-circle-nodes"></i><span>Carte 3D Écosystème</span>
+      </button>
+      <button class="nav-pill" data-view="reseau">
+        <i class="fa-solid fa-user-group"></i><span>Réseau Promo</span>
+      </button>
+      <button class="nav-pill" data-view="simulateur">
+        <i class="fa-solid fa-calculator"></i><span>Simulateur Ratios</span>
+      </button>
+    </nav>
+
+    <!-- Conteneur des Vues Principales -->
+    <main class="main-view-container">
+
+      <!-- 1. VUE : RÉPERTOIRE DES ÉTABLISSEMENTS -->
+      <section id="view-etablissements" class="view-section active">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-compass"></i>Cartographie Territoriale France</div>
+          <h2 class="hero-title">Répertoire Exhaustif Médico-Social & Sanitaire</h2>
+          <p class="hero-desc">
+            Base opérationnelle de référence pour tout futur dirigeant ou encadrant : missions réglementaires (CASF & CSP), publics accueillis, circuits de financement ARS/CD, métiers associés et repères stratégiques de gestion.
+          </p>
+          <div class="hero-stats-row">
+            <div class="stat-chip">
+              <span class="stat-chip-num" id="stat-etab-count">11</span>
+              <span class="stat-chip-label">Catégories majeures d'EMS & Sanitaire</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">100%</span>
+              <span class="stat-chip-label">Conformité réglementaire CASF / CSP</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">5 ans</span>
+              <span class="stat-chip-label">Cycle d'évaluation quinquennale HAS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="filter-chips-list">
+            <button class="filter-chip-btn etab-filter-btn active" data-cat="all">Tous les types</button>
+            <button class="filter-chip-btn etab-filter-btn" data-cat="Handicap Adulte">Handicap Adulte (MAS, FAM...)</button>
+            <button class="filter-chip-btn etab-filter-btn" data-cat="Handicap Enfance">Handicap Enfance (IME, SESSAD)</button>
+            <button class="filter-chip-btn etab-filter-btn" data-cat="Personnes Âgées">Personnes Âgées (EHPAD)</button>
+            <button class="filter-chip-btn etab-filter-btn" data-cat="Sanitaire">Sanitaire (CH, SMR, HAD, Psy)</button>
+            <button class="filter-chip-btn etab-filter-btn" data-cat="Protection de l'Enfance">Protection Enfance (MECS)</button>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="grid-etablissements">
+          <!-- Injecté dynamiquement par app.js -->
+        </div>
+      </section>
+
+      <!-- 2. VUE : MÉTIERS, DIPLÔME ET ORGANIGRAMMES -->
+      <section id="view-carrieres" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-graduation-cap"></i>Master MES · IAE Paris-Est & Débouchés</div>
+          <h2 class="hero-title">Carrières, Organigrammes & Niveaux de Responsabilité</h2>
+          <p class="hero-desc">
+            Décryptage de tous les postes accessibles avec votre diplôme : place exacte dans l'organigramme, équipes managées (N-1, N-2), périmètre de décision budgétaire/juridique, et déclinaison selon la taille d'établissement.
+          </p>
+          <div class="hero-stats-row">
+            <div class="stat-chip">
+              <span class="stat-chip-num" id="stat-carrieres-count">6</span>
+              <span class="stat-chip-label">Métiers de Direction & d'Encadrement</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">N-1 à N-3</span>
+              <span class="stat-chip-label">Chaîne managériale opérationnelle</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">100%</span>
+              <span class="stat-chip-label">Employabilité à 6 mois</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="grid-carrieres">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </section>
+
+      <!-- 3. VUE : RÉUNIONS, ASSEMBLÉES ET INSTANCES -->
+      <section id="view-reunions" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-users"></i>Gouvernance & Dialogue Social</div>
+          <h2 class="hero-title">Guide des Réunions & Instances Obligatoires</h2>
+          <p class="hero-desc">
+            CODIR, CODIREL, COPIL, CVS, CSE, CME, CSIRMT, CDU : signification exacte des sigles, participants obligatoires, finalités, niveau décisionnel et bonnes pratiques pour animer chaque instance avec leadership.
+          </p>
+          <div class="hero-stats-row">
+            <div class="stat-chip">
+              <span class="stat-chip-num" id="stat-instances-count">8</span>
+              <span class="stat-chip-label">Instances & Assemblées Répertoriées</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">L.311-6</span>
+              <span class="stat-chip-label">Démocratie des usagers (CVS obligatoire)</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">L.2311-1</span>
+              <span class="stat-chip-label">Code du travail (CSE obligatoire dès 11 salariés)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="grid-reunions">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </section>
+
+      <!-- 4. VUE : OUTILS ET DOCUMENTS STRATÉGIQUES -->
+      <section id="view-documents" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-briefcase"></i>Pilotage Stratégique & Budgétaire</div>
+          <h2 class="hero-title">Outils & Documents Directeurs à Produire</h2>
+          <p class="hero-desc">
+            Tout ce qu'un directeur doit savoir produire : CNR, PPI, Appels à Projets, EPRD, ERRD, CPOM, DUERP + PAPRIPACT, Évaluation HAS, Projet d'établissement, PPA, Contrat de séjour. Méthodologie pas-à-pas, calendrier et impact.
+          </p>
+          <div class="hero-stats-row">
+            <div class="stat-chip">
+              <span class="stat-chip-num" id="stat-docs-count">9</span>
+              <span class="stat-chip-label">Documents Fondateurs Décryptés</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">30 Avril</span>
+              <span class="stat-chip-label">Date butoir de l'ERRD à l'ARS/CD</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">1er Janvier</span>
+              <span class="stat-chip-label">Vote & entrée en vigueur de l'EPRD</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="grid-documents">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </section>
+
+      <!-- 5. VUE : ACTEURS ET INSTANCES RÉGULATRICES -->
+      <section id="view-acteurs" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-landmark-flag"></i>Environnement Institutionnel</div>
+          <h2 class="hero-title">Acteurs, Tutelles & Partenaires Territoriaux</h2>
+          <p class="hero-desc">
+            ARS, Conseil Départemental, HAS, ANAP, DGCS, DREETS, MDPH : leurs missions régaliennes, leur positionnement par rapport à votre établissement, la posture managériale recommandée et les leviers pour obtenir subventions et autorisations.
+          </p>
+        </div>
+
+        <div class="cards-grid" id="grid-acteurs">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </section>
+
+      <!-- 6. VUE : BOÎTE À OUTILS RH & FAQ PRATIQUE DU DIRIGEANT -->
+      <section id="view-rh" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-user-shield"></i>Gestion des Équipes & Droit Social</div>
+          <h2 class="hero-title">FAQ RH & Situations Critiques du Dirigeant</h2>
+          <p class="hero-desc">
+            Réponses chirurgicales aux questions concrètes du quotidien : durées de travail, gestion des refus de rappel sur repos, astreintes, procédures disciplinaires, gestion des suspicions de maltraitance, inaptitudes et conventions collectives.
+          </p>
+          <div class="hero-stats-row">
+            <div class="stat-chip">
+              <span class="stat-chip-num" id="stat-rh-count">10</span>
+              <span class="stat-chip-label">Situations RH critiques analysées</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">CCN 51 / 66</span>
+              <span class="stat-chip-label">Conventions collectives décryptées</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-chip-num">48h</span>
+              <span class="stat-chip-label">Délai impératif signalement EIGS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-accordion-group" id="faq-accordion-list">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </section>
+
+      <!-- 7. VUE : CARTE 3D INTERACTIVE DE L'ÉCOSYSTÈME -->
+      <section id="view-carte3d" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-atom"></i>Réseau Relationnel Vivant</div>
+          <h2 class="hero-title">Carte 3D des Interactions de l'Écosystème Santé</h2>
+          <p class="hero-desc">
+            Visualisez en 3D qui demande quoi, qui finance quoi, et où se situe le futur dirigeant au cœur des flux réglementaires, financiers, RH et démocratiques. Faites tourner la sphère, zoomez et cliquez sur les nœuds pour afficher les fiches détaillées.
+          </p>
+        </div>
+
+        <div class="map-canvas-wrapper">
+          <div id="three-canvas-container"></div>
+
+          <div class="map-floating-hud">
+            <div class="hud-panel">
+              <div class="eyebrow-tag" style="margin-bottom: 4px;">Légende des Nœuds</div>
+              <div class="hud-legend-item"><span class="legend-dot" style="background: #f59e0b;"></span><span>Centre : Dirigeant EMS</span></div>
+              <div class="hud-legend-item"><span class="legend-dot" style="background: #ef4444;"></span><span>Tutelles (ARS, CD, HAS)</span></div>
+              <div class="hud-legend-item"><span class="legend-dot" style="background: #3b82f6;"></span><span>Outils & Budgets (CPOM, EPRD)</span></div>
+              <div class="hud-legend-item"><span class="legend-dot" style="background: #10b981;"></span><span>Instances (CODIR, CSE, CVS)</span></div>
+              <div class="hud-legend-item"><span class="legend-dot" style="background: #8b5cf6;"></span><span>Métiers Soins & Éducatifs</span></div>
+            </div>
+
+            <div class="map-controls-group">
+              <button class="map-btn" onclick="App.graphInstance.filterFlows('all')"><i class="fa-solid fa-globe"></i>Tous les flux</button>
+              <button class="map-btn" onclick="App.graphInstance.filterFlows('finances')"><i class="fa-solid fa-coins"></i>Flux Financiers</button>
+              <button class="map-btn" onclick="App.graphInstance.filterFlows('regulation')"><i class="fa-solid fa-gavel"></i>Réglementation</button>
+              <button class="map-btn" onclick="App.graphInstance.filterFlows('rh')"><i class="fa-solid fa-users"></i>Flux RH & Soins</button>
+              <button class="map-btn" onclick="App.graphInstance.resetView()"><i class="fa-solid fa-arrows-rotate"></i>Recentrer vue</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. VUE : ANNUAIRE PROMO & RÉSEAU DES PAIRS (FIREBASE READY) -->
+      <section id="view-reseau" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-network-wired"></i>Networking & Entraide Promotion</div>
+          <h2 class="hero-title">Réseau des Camarades & Annuaire d'Alternance</h2>
+          <p class="hero-desc">
+            Partagez vos lieux d'alternance, vos rôles et vos expériences avec vos camarades de promotion. Filtrez par type d'établissement pour trouver instantanément qui contacter pour un retour d'expérience ou une question métier.
+          </p>
+          <div class="hero-stats-row" style="margin-top: 14px;">
+            <button class="btn-primary-gradient" id="btn-toggle-alumni-form">
+              <i class="fa-solid fa-user-plus"></i>Rejoindre / Ajouter un camarade
+            </button>
+            <button class="btn-secondary-glass" id="btn-export-alumni">
+              <i class="fa-solid fa-download"></i>Exporter en JSON
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulaire Dépliable d'Ajout d'Alumni -->
+        <div id="alumni-form-collapse" class="form-card-container" style="display: none;">
+          <h3 style="font-size: 18px; margin-bottom: 16px; font-weight: 700;">Ajouter mes coordonnées & mon expérience</h3>
+          <form id="alumni-add-form">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Nom</label>
+                <input type="text" id="al-nom" required placeholder="Ex: Dupont">
+              </div>
+              <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" id="al-prenom" required placeholder="Ex: Alexandre">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Poste / Rôle en alternance</label>
+                <input type="text" id="al-poste" required placeholder="Ex: Adjoint de Direction / Chargé de mission CPOM">
+              </div>
+              <div class="form-group">
+                <label>Type d'établissement</label>
+                <select id="al-type-structure">
+                  <option value="MAS">MAS (Maison d'Accueil Spécialisée)</option>
+                  <option value="FAM">FAM (Foyer d'Accueil Médicalisé)</option>
+                  <option value="EHPAD">EHPAD</option>
+                  <option value="IME">IME / SESSAD</option>
+                  <option value="ESAT">ESAT</option>
+                  <option value="CH">Centre Hospitalier / CHU</option>
+                  <option value="SMR">SMR / SSR</option>
+                  <option value="HAD">HAD</option>
+                  <option value="Autre">Siège / Autre</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Nom de la Structure / Groupe</label>
+                <input type="text" id="al-etablissement" placeholder="Ex: Fondation Saint Jean de Dieu · MAS Lecourbe">
+              </div>
+              <div class="form-group">
+                <label>Ville & Région</label>
+                <input type="text" id="al-ville" placeholder="Ex: Paris 15e (Île-de-France)">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Spécialités / Compétences clés (séparées par des virgules)</label>
+                <input type="text" id="al-specialites" placeholder="Ex: NetSoins, Négociation CPOM, CNR, DUERP">
+              </div>
+              <div class="form-group">
+                <label>Email de contact</label>
+                <input type="email" id="al-email" placeholder="alexandre.dupont@asso.fr">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label>Téléphone professionnel / mobile</label>
+              <input type="tel" id="al-tel" placeholder="+33 6 12 34 56 78">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label>Résumé de vos missions & expérience clé</label>
+              <textarea id="al-experience" rows="3" placeholder="Décrivez succinctement les dossiers majeurs que vous avez pilotés..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-check"></i>Enregistrer dans l'annuaire</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filtre Déroulant d'Expérience -->
+        <div class="filter-toolbar">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Filtrer par structure :</label>
+            <select id="filter-alumni-structure" style="background: var(--bg-surface); border: 1px solid var(--border-alpha); border-radius: 10px; padding: 7px 12px; color: #fff; font-size: 13.5px; outline: none;">
+              <option value="all">Toutes les structures</option>
+              <option value="MAS">MAS</option>
+              <option value="FAM">FAM</option>
+              <option value="EHPAD">EHPAD</option>
+              <option value="IME">IME</option>
+              <option value="SMR">SMR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cards-grid" id="grid-alumni">
+          <!-- Injecté dynamiquement -->
+        </div>
+
+        <!-- Connecteur Firebase Info Box -->
+        <div class="hero-glass-card" style="margin-top: 30px;">
+          <div class="eyebrow-tag" style="color: #f59e0b;"><i class="fa-solid fa-fire"></i>Connexion Firebase Firestore Ready</div>
+          <h3 style="font-size: 18px; margin-bottom: 6px;">Prêt pour la synchronisation Cloud GitHub & Firebase</h3>
+          <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">
+            Pour stocker les réponses de toute la classe dans une base de données en direct sans serveur, il vous suffit d'insérer votre configuration Firebase SDK dans le fichier <code>index.html</code>. Vos camarades pourront alors s'enregistrer depuis leur iPhone ou Android et les fiches apparaîtront en temps réel !
+          </p>
+        </div>
+      </section>
+
+      <!-- 9. VUE : SIMULATEUR DE RATIOS EMS -->
+      <section id="view-simulateur" class="view-section">
+        <div class="hero-glass-card">
+          <div class="eyebrow-tag"><i class="fa-solid fa-calculator"></i>Contrôle de Gestion & Dimensionnement</div>
+          <h2 class="hero-title">Calculateur Express de Taux d'Encadrement</h2>
+          <p class="hero-desc">
+            Évaluez en direct la cohérence de vos effectifs (ETP) par rapport au capacitaire de l'établissement (lits ou places installées) et analysez la conformité aux moyennes sectorielles de l'ANAP.
+          </p>
+        </div>
+
+        <div class="form-card-container">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Capacité installée (Nombre de places / lits autorisés)</label>
+              <input type="number" id="sim-places" value="60" min="1" inputmode="numeric">
+            </div>
+            <div class="form-group">
+              <label>GIR Moyen Pondéré (GMP) ou Lourdeur moyenne (1 à 6)</label>
+              <input type="number" id="sim-gmp" value="750" placeholder="Ex: 750 pour EHPAD / MAS">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>ETP Soignants réels (IDE + AS + Rééducateurs)</label>
+              <input type="number" id="sim-etp-soignants" value="28" step="0.5" inputmode="decimal">
+            </div>
+            <div class="form-group">
+              <label>ETP Éducatifs réels (Éducateurs + AES + Moniteurs)</label>
+              <input type="number" id="sim-etp-educ" value="12" step="0.5" inputmode="decimal">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label>ETP Total de l'établissement (Soins + Éducatif + Admin + Logistique)</label>
+            <input type="number" id="sim-etp-total" value="48" step="0.5" inputmode="decimal">
+          </div>
+
+          <button class="btn-primary-gradient" id="btn-calc-ratios"><i class="fa-solid fa-chart-pie"></i>Calculer les Ratios</button>
+
+          <div id="sim-results-box" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--accent-cyan); font-weight: 700;">Résultats de l'Évaluation :</h4>
+            <div class="hero-stats-row">
+              <div class="stat-chip">
+                <span class="stat-chip-num" id="sim-res-encadrement">0.80</span>
+                <span class="stat-chip-label">Taux d'encadrement global (ETP / place)</span>
+              </div>
+              <div class="stat-chip">
+                <span class="stat-chip-num" id="sim-res-soignant">0.47</span>
+                <span class="stat-chip-label">Ratio de soins direct</span>
+              </div>
+              <div class="stat-chip">
+                <span class="stat-chip-num" id="sim-res-educ">0.20</span>
+                <span class="stat-chip-label">Ratio éducatif / animation</span>
+              </div>
+            </div>
+            <div class="detail-block" style="margin-top: 16px; background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px;">
+              <div class="detail-label">Diagnostic de Conformité ANAP</div>
+              <div id="sim-res-avis" style="color: #fff; font-size: 14px; font-weight: 500;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Mobile Bottom Dock (Navigation tactile iPhone / Android) -->
+    <nav class="mobile-bottom-dock">
+      <button class="dock-tab-btn active" data-view="etablissements">
+        <i class="fa-solid fa-hospital"></i>
+        <span>Établissements</span>
+      </button>
+      <button class="dock-tab-btn" data-view="carrieres">
+        <i class="fa-solid fa-sitemap"></i>
+        <span>Métiers</span>
+      </button>
+      <button class="dock-tab-btn" data-view="carte3d">
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span>Carte 3D</span>
+      </button>
+      <button class="dock-tab-btn" data-view="rh">
+        <i class="fa-solid fa-scale-balanced"></i>
+        <span>FAQ RH</span>
+      </button>
+      <button class="dock-tab-btn" data-view="reseau">
+        <i class="fa-solid fa-user-group"></i>
+        <span>Réseau</span>
+      </button>
+    </nav>
+
+    <!-- Modale Bottom Sheet (Drawer Mobile-First) -->
+    <div class="glass-modal-overlay" id="app-modal-overlay">
+      <div class="glass-modal-sheet">
+        <div class="modal-grabber-bar"></div>
+        <div class="modal-header-row">
+          <h3 id="app-modal-title">Détail</h3>
+          <button class="modal-close-btn" id="app-modal-close" aria-label="Fermer la modale">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-scrollable-body" id="app-modal-body">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteneur Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <!-- Scripts Applicatifs -->
+  <script src="js/data.js"></script>
+  <script src="js/graph3d.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

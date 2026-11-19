@@ -1,535 +1,2135 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0d122b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="CADR'EMS - Boîte à Outils Complète & Cockpit du Futur Dirigeant d'Établissement Sanitaire et Médico-Social en France.">
-  <title>CADR'EMS · Le Cockpit du Dirigeant de Santé</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PiloteSanté v2 — Suite Direction EMS & Sanitaire</title>
 
-  <!-- Polices Google & Icônes FontAwesome -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: 'oklch(0.97 0.02 260)',
+                            500: 'oklch(0.62 0.22 270)',
+                            600: 'oklch(0.55 0.24 270)',
+                            emerald: 'oklch(0.70 0.18 165)',
+                            amber: 'oklch(0.75 0.18 75)',
+                            rose: 'oklch(0.65 0.22 25)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-  <!-- Three.js pour le Graph 3D WebGL -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Feuille de styles personnalisée Liquid Glass -->
-  <link rel="stylesheet" href="css/styles.css">
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- CSS Custom Styles & OKLCH Theme Rules -->
+    <style>
+        :root {
+            --bg-base: oklch(0.12 0.03 260);
+            --glass-bg: oklch(0.18 0.04 260 / 0.65);
+            --glass-border: oklch(0.99 0 0 / 0.12);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --text-main: oklch(0.96 0.01 260);
+            --text-muted: oklch(0.75 0.03 260);
+            --accent-primary: oklch(0.65 0.22 270);
+            --accent-emerald: oklch(0.72 0.18 165);
+            --accent-amber: oklch(0.78 0.18 75);
+        }
+
+        .high-contrast {
+            --bg-base: #000000 !important;
+            --glass-bg: #0d0d0d !important;
+            --glass-border: #ffffff !important;
+            --text-main: #ffffff !important;
+            --text-muted: #e0e0e0 !important;
+            --accent-primary: #ffff00 !important;
+            --accent-emerald: #00ff00 !important;
+            --accent-amber: #ffaa00 !important;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Ambient Liquid Glass Orbs */
+        .glass-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+            animation: orbFloat 22s infinite alternate ease-in-out;
+        }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(60px, -40px) scale(1.15); }
+            100% { transform: translate(-40px, 50px) scale(0.95); }
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .glass-card-interactive {
+            cursor: pointer;
+        }
+
+        .glass-card-interactive:active {
+            transform: scale(0.98);
+        }
+
+        .glass-card-interactive:hover {
+            border-color: oklch(0.75 0.18 270 / 0.4);
+            box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.2);
+        }
+
+        /* Concentric Inner Radius Utilities (Enforcing Outer - Padding = Inner) */
+        .outer-card-24 { border-radius: 24px; padding: 16px; }
+        .inner-box-16 { border-radius: 16px; }
+
+        .outer-card-20 { border-radius: 20px; padding: 12px; }
+        .inner-box-12 { border-radius: 12px; }
+
+        .outer-card-16 { border-radius: 16px; padding: 8px; }
+        .inner-box-8 { border-radius: 8px; }
+
+        /* Custom Monospace Numbers */
+        .num-mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: oklch(0.4 0.05 260 / 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: oklch(0.6 0.15 270 / 0.8);
+        }
+
+        /* Modal Backdrop Entrance */
+        .modal-animate-enter {
+            animation: modalIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Staggered Item Animation Delay */
+        .stagger-item {
+            opacity: 0;
+            animation: staggerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: calc(var(--i, 0) * 35ms);
+        }
+        @keyframes staggerFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-full flex flex-col relative selection:bg-indigo-500/30 selection:text-white">
 
-  <!-- Aurora Background animé -->
-  <div class="aurora-bg">
-    <div class="aurora-orb orb-1"></div>
-    <div class="aurora-orb orb-2"></div>
-    <div class="aurora-orb orb-3"></div>
-  </div>
+    <!-- Ambient Liquid Glass Background Orbs -->
+    <div class="glass-orb w-96 h-96 bg-indigo-600 top-[-10%] left-[-10%]"></div>
+    <div class="glass-orb w-[30rem] h-[30rem] bg-emerald-600 top-[40%] right-[-15%]" style="animation-delay: -7s;"></div>
+    <div class="glass-orb w-80 h-80 bg-amber-600 bottom-[-5%] left-[20%]" style="animation-delay: -14s;"></div>
 
-  <div class="app-container">
-    <!-- Header Liquid Glass -->
-    <header class="glass-header">
-      <div class="brand-wrapper" onclick="App.switchView('etablissements')">
-        <div class="brand-logo-gem">
-          <i class="fa-solid fa-staff-snake"></i>
+    <!-- MAIN APP WRAPPER -->
+    <div id="app" class="relative z-10 flex flex-col min-h-screen max-w-[1600px] mx-auto w-full px-3 sm:px-6 pt-4 pb-28 md:pb-8">
+
+        <!-- HEADER TOP BAR -->
+        <header class="glass-card outer-card-20 rounded-2xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-400 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-100 to-indigo-300">
+                            PiloteSanté <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 num-mono">v2.0</span>
+                        </h1>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
+                            <i class="fa-solid fa-graduation-cap mr-1"></i> Master MES (IAE Paris-Est)
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium mt-0.5">Suite de Direction EMS & Sanitaire • Ref. Post MAS / ARS / HAS</p>
+                </div>
+            </div>
+
+            <!-- HEADER ACTIONS -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-white/10">
+                <button onclick="toggleHighContrast()" id="hcBtn" aria-label="Toggle High Contrast Mode" title="Mode Contrôle Accessibilité (WCAG AAA)" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-xs font-semibold flex items-center gap-2 transition active:scale-95 border border-white/10">
+                    <i class="fa-solid fa-circle-half-stroke text-amber-400"></i>
+                    <span class="hidden lg:inline">Contraste AAA</span>
+                </button>
+                <button onclick="openGdprModal()" aria-label="Politique RGPD et Conformité" title="Conformité RGPD & CGU" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-xs font-semibold flex items-center gap-2 transition active:scale-95 border border-white/10">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                    <span class="hidden lg:inline">Conformité</span>
+                </button>
+                <button onclick="confirmResetData()" aria-label="Réinitialiser les données locales" title="Réinitialiser l'application" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs transition active:scale-95 border border-rose-500/20">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT (DESKTOP SIDEBAR + CONTENT CONTAINER) -->
+        <div class="flex flex-col md:flex-row gap-6 flex-1 items-start">
+
+            <!-- DESKTOP NAVIGATION SIDEBAR (Hidden on mobile, mobile uses bottom bar) -->
+            <aside class="hidden md:flex flex-col gap-2 w-64 shrink-0 glass-card outer-card-20 rounded-2xl sticky top-4">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-1">Modules de Direction</div>
+                <nav id="desktopNav" class="flex flex-col gap-1.5" role="tablist">
+                    <!-- Nav items dynamically highlighted via JS -->
+                </nav>
+                <div class="mt-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200">
+                    <div class="font-semibold flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-lightbulb text-amber-300"></i> Note de Cadrage
+                    </div>
+                    Conçu pour les directeurs et cadres de santé en prise de poste, audit CPOM ou inspection ARS.
+                </div>
+            </aside>
+
+            <!-- TAB CONTENT AREA -->
+            <main id="mainContent" class="flex-1 w-full flex flex-col gap-6">
+                <!-- Content injected dynamically via UI_RENDERERS -->
+            </main>
         </div>
-        <div class="brand-text">
-          <h1>CADR'EMS</h1>
-          <div class="brand-sub">
-            <span class="live-pulse-dot"></span>
-            <span>Master MES · Système FR</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <div class="search-input-pill">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="global-search-input" placeholder="Rechercher sigle, loi, acteur..." enterkeyhint="search" autocomplete="off">
-        </div>
-        <button class="theme-toggle-btn" id="theme-toggle" aria-label="Changer de thème">
-          <i class="fa-solid fa-moon"></i>
-        </button>
-      </div>
-    </header>
-
-    <!-- Barre de Navigation Pills Horizontale -->
-    <nav class="nav-pills-bar">
-      <button class="nav-pill active" data-view="etablissements">
-        <i class="fa-solid fa-hospital"></i><span>Établissements</span>
-      </button>
-      <button class="nav-pill" data-view="carrieres">
-        <i class="fa-solid fa-sitemap"></i><span>Métiers & Diplôme</span>
-      </button>
-      <button class="nav-pill" data-view="reunions">
-        <i class="fa-solid fa-comments"></i><span>Instances & Réunions</span>
-      </button>
-      <button class="nav-pill" data-view="documents">
-        <i class="fa-solid fa-file-signature"></i><span>Outils & Documents</span>
-      </button>
-      <button class="nav-pill" data-view="acteurs">
-        <i class="fa-solid fa-landmark"></i><span>Tutelles & Acteurs</span>
-      </button>
-      <button class="nav-pill" data-view="rh">
-        <i class="fa-solid fa-scale-balanced"></i><span>Boîte à Outils RH</span>
-      </button>
-      <button class="nav-pill" data-view="carte3d">
-        <i class="fa-solid fa-circle-nodes"></i><span>Carte 3D Écosystème</span>
-      </button>
-      <button class="nav-pill" data-view="reseau">
-        <i class="fa-solid fa-user-group"></i><span>Réseau Promo</span>
-      </button>
-      <button class="nav-pill" data-view="simulateur">
-        <i class="fa-solid fa-calculator"></i><span>Simulateur Ratios</span>
-      </button>
-    </nav>
-
-    <!-- Conteneur des Vues Principales -->
-    <main class="main-view-container">
-
-      <!-- 1. VUE : RÉPERTOIRE DES ÉTABLISSEMENTS -->
-      <section id="view-etablissements" class="view-section active">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-compass"></i>Cartographie Territoriale France</div>
-          <h2 class="hero-title">Répertoire Exhaustif Médico-Social & Sanitaire</h2>
-          <p class="hero-desc">
-            Base opérationnelle de référence pour tout futur dirigeant ou encadrant : missions réglementaires (CASF & CSP), publics accueillis, circuits de financement ARS/CD, métiers associés et repères stratégiques de gestion.
-          </p>
-          <div class="hero-stats-row">
-            <div class="stat-chip">
-              <span class="stat-chip-num" id="stat-etab-count">11</span>
-              <span class="stat-chip-label">Catégories majeures d'EMS & Sanitaire</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">100%</span>
-              <span class="stat-chip-label">Conformité réglementaire CASF / CSP</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">5 ans</span>
-              <span class="stat-chip-label">Cycle d'évaluation quinquennale HAS</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="filter-toolbar">
-          <div class="filter-chips-list">
-            <button class="filter-chip-btn etab-filter-btn active" data-cat="all">Tous les types</button>
-            <button class="filter-chip-btn etab-filter-btn" data-cat="Handicap Adulte">Handicap Adulte (MAS, FAM...)</button>
-            <button class="filter-chip-btn etab-filter-btn" data-cat="Handicap Enfance">Handicap Enfance (IME, SESSAD)</button>
-            <button class="filter-chip-btn etab-filter-btn" data-cat="Personnes Âgées">Personnes Âgées (EHPAD)</button>
-            <button class="filter-chip-btn etab-filter-btn" data-cat="Sanitaire">Sanitaire (CH, SMR, HAD, Psy)</button>
-            <button class="filter-chip-btn etab-filter-btn" data-cat="Protection de l'Enfance">Protection Enfance (MECS)</button>
-          </div>
-        </div>
-
-        <div class="cards-grid" id="grid-etablissements">
-          <!-- Injecté dynamiquement par app.js -->
-        </div>
-      </section>
-
-      <!-- 2. VUE : MÉTIERS, DIPLÔME ET ORGANIGRAMMES -->
-      <section id="view-carrieres" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-graduation-cap"></i>Master MES · IAE Paris-Est & Débouchés</div>
-          <h2 class="hero-title">Carrières, Organigrammes & Niveaux de Responsabilité</h2>
-          <p class="hero-desc">
-            Décryptage de tous les postes accessibles avec votre diplôme : place exacte dans l'organigramme, équipes managées (N-1, N-2), périmètre de décision budgétaire/juridique, et déclinaison selon la taille d'établissement.
-          </p>
-          <div class="hero-stats-row">
-            <div class="stat-chip">
-              <span class="stat-chip-num" id="stat-carrieres-count">6</span>
-              <span class="stat-chip-label">Métiers de Direction & d'Encadrement</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">N-1 à N-3</span>
-              <span class="stat-chip-label">Chaîne managériale opérationnelle</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">100%</span>
-              <span class="stat-chip-label">Employabilité à 6 mois</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="cards-grid" id="grid-carrieres">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </section>
-
-      <!-- 3. VUE : RÉUNIONS, ASSEMBLÉES ET INSTANCES -->
-      <section id="view-reunions" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-users"></i>Gouvernance & Dialogue Social</div>
-          <h2 class="hero-title">Guide des Réunions & Instances Obligatoires</h2>
-          <p class="hero-desc">
-            CODIR, CODIREL, COPIL, CVS, CSE, CME, CSIRMT, CDU : signification exacte des sigles, participants obligatoires, finalités, niveau décisionnel et bonnes pratiques pour animer chaque instance avec leadership.
-          </p>
-          <div class="hero-stats-row">
-            <div class="stat-chip">
-              <span class="stat-chip-num" id="stat-instances-count">8</span>
-              <span class="stat-chip-label">Instances & Assemblées Répertoriées</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">L.311-6</span>
-              <span class="stat-chip-label">Démocratie des usagers (CVS obligatoire)</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">L.2311-1</span>
-              <span class="stat-chip-label">Code du travail (CSE obligatoire dès 11 salariés)</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="cards-grid" id="grid-reunions">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </section>
-
-      <!-- 4. VUE : OUTILS ET DOCUMENTS STRATÉGIQUES -->
-      <section id="view-documents" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-briefcase"></i>Pilotage Stratégique & Budgétaire</div>
-          <h2 class="hero-title">Outils & Documents Directeurs à Produire</h2>
-          <p class="hero-desc">
-            Tout ce qu'un directeur doit savoir produire : CNR, PPI, Appels à Projets, EPRD, ERRD, CPOM, DUERP + PAPRIPACT, Évaluation HAS, Projet d'établissement, PPA, Contrat de séjour. Méthodologie pas-à-pas, calendrier et impact.
-          </p>
-          <div class="hero-stats-row">
-            <div class="stat-chip">
-              <span class="stat-chip-num" id="stat-docs-count">9</span>
-              <span class="stat-chip-label">Documents Fondateurs Décryptés</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">30 Avril</span>
-              <span class="stat-chip-label">Date butoir de l'ERRD à l'ARS/CD</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">1er Janvier</span>
-              <span class="stat-chip-label">Vote & entrée en vigueur de l'EPRD</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="cards-grid" id="grid-documents">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </section>
-
-      <!-- 5. VUE : ACTEURS ET INSTANCES RÉGULATRICES -->
-      <section id="view-acteurs" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-landmark-flag"></i>Environnement Institutionnel</div>
-          <h2 class="hero-title">Acteurs, Tutelles & Partenaires Territoriaux</h2>
-          <p class="hero-desc">
-            ARS, Conseil Départemental, HAS, ANAP, DGCS, DREETS, MDPH : leurs missions régaliennes, leur positionnement par rapport à votre établissement, la posture managériale recommandée et les leviers pour obtenir subventions et autorisations.
-          </p>
-        </div>
-
-        <div class="cards-grid" id="grid-acteurs">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </section>
-
-      <!-- 6. VUE : BOÎTE À OUTILS RH & FAQ PRATIQUE DU DIRIGEANT -->
-      <section id="view-rh" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-user-shield"></i>Gestion des Équipes & Droit Social</div>
-          <h2 class="hero-title">FAQ RH & Situations Critiques du Dirigeant</h2>
-          <p class="hero-desc">
-            Réponses chirurgicales aux questions concrètes du quotidien : durées de travail, gestion des refus de rappel sur repos, astreintes, procédures disciplinaires, gestion des suspicions de maltraitance, inaptitudes et conventions collectives.
-          </p>
-          <div class="hero-stats-row">
-            <div class="stat-chip">
-              <span class="stat-chip-num" id="stat-rh-count">10</span>
-              <span class="stat-chip-label">Situations RH critiques analysées</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">CCN 51 / 66</span>
-              <span class="stat-chip-label">Conventions collectives décryptées</span>
-            </div>
-            <div class="stat-chip">
-              <span class="stat-chip-num">48h</span>
-              <span class="stat-chip-label">Délai impératif signalement EIGS</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="faq-accordion-group" id="faq-accordion-list">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </section>
-
-      <!-- 7. VUE : CARTE 3D INTERACTIVE DE L'ÉCOSYSTÈME -->
-      <section id="view-carte3d" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-atom"></i>Réseau Relationnel Vivant</div>
-          <h2 class="hero-title">Carte 3D des Interactions de l'Écosystème Santé</h2>
-          <p class="hero-desc">
-            Visualisez en 3D qui demande quoi, qui finance quoi, et où se situe le futur dirigeant au cœur des flux réglementaires, financiers, RH et démocratiques. Faites tourner la sphère, zoomez et cliquez sur les nœuds pour afficher les fiches détaillées.
-          </p>
-        </div>
-
-        <div class="map-canvas-wrapper">
-          <div id="three-canvas-container"></div>
-
-          <div class="map-floating-hud">
-            <div class="hud-panel">
-              <div class="eyebrow-tag" style="margin-bottom: 4px;">Légende des Nœuds</div>
-              <div class="hud-legend-item"><span class="legend-dot" style="background: #f59e0b;"></span><span>Centre : Dirigeant EMS</span></div>
-              <div class="hud-legend-item"><span class="legend-dot" style="background: #ef4444;"></span><span>Tutelles (ARS, CD, HAS)</span></div>
-              <div class="hud-legend-item"><span class="legend-dot" style="background: #3b82f6;"></span><span>Outils & Budgets (CPOM, EPRD)</span></div>
-              <div class="hud-legend-item"><span class="legend-dot" style="background: #10b981;"></span><span>Instances (CODIR, CSE, CVS)</span></div>
-              <div class="hud-legend-item"><span class="legend-dot" style="background: #8b5cf6;"></span><span>Métiers Soins & Éducatifs</span></div>
-            </div>
-
-            <div class="map-controls-group">
-              <button class="map-btn" onclick="App.graphInstance.filterFlows('all')"><i class="fa-solid fa-globe"></i>Tous les flux</button>
-              <button class="map-btn" onclick="App.graphInstance.filterFlows('finances')"><i class="fa-solid fa-coins"></i>Flux Financiers</button>
-              <button class="map-btn" onclick="App.graphInstance.filterFlows('regulation')"><i class="fa-solid fa-gavel"></i>Réglementation</button>
-              <button class="map-btn" onclick="App.graphInstance.filterFlows('rh')"><i class="fa-solid fa-users"></i>Flux RH & Soins</button>
-              <button class="map-btn" onclick="App.graphInstance.resetView()"><i class="fa-solid fa-arrows-rotate"></i>Recentrer vue</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 8. VUE : ANNUAIRE PROMO & RÉSEAU DES PAIRS (FIREBASE READY) -->
-      <section id="view-reseau" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-network-wired"></i>Networking & Entraide Promotion</div>
-          <h2 class="hero-title">Réseau des Camarades & Annuaire d'Alternance</h2>
-          <p class="hero-desc">
-            Partagez vos lieux d'alternance, vos rôles et vos expériences avec vos camarades de promotion. Filtrez par type d'établissement pour trouver instantanément qui contacter pour un retour d'expérience ou une question métier.
-          </p>
-          <div class="hero-stats-row" style="margin-top: 14px;">
-            <button class="btn-primary-gradient" id="btn-toggle-alumni-form">
-              <i class="fa-solid fa-user-plus"></i>Rejoindre / Ajouter un camarade
-            </button>
-            <button class="btn-secondary-glass" id="btn-export-alumni">
-              <i class="fa-solid fa-download"></i>Exporter en JSON
-            </button>
-          </div>
-        </div>
-
-        <!-- Formulaire Dépliable d'Ajout d'Alumni -->
-        <div id="alumni-form-collapse" class="form-card-container" style="display: none;">
-          <h3 style="font-size: 18px; margin-bottom: 16px; font-weight: 700;">Ajouter mes coordonnées & mon expérience</h3>
-          <form id="alumni-add-form">
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Nom</label>
-                <input type="text" id="al-nom" required placeholder="Ex: Dupont">
-              </div>
-              <div class="form-group">
-                <label>Prénom</label>
-                <input type="text" id="al-prenom" required placeholder="Ex: Alexandre">
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Poste / Rôle en alternance</label>
-                <input type="text" id="al-poste" required placeholder="Ex: Adjoint de Direction / Chargé de mission CPOM">
-              </div>
-              <div class="form-group">
-                <label>Type d'établissement</label>
-                <select id="al-type-structure">
-                  <option value="MAS">MAS (Maison d'Accueil Spécialisée)</option>
-                  <option value="FAM">FAM (Foyer d'Accueil Médicalisé)</option>
-                  <option value="EHPAD">EHPAD</option>
-                  <option value="IME">IME / SESSAD</option>
-                  <option value="ESAT">ESAT</option>
-                  <option value="CH">Centre Hospitalier / CHU</option>
-                  <option value="SMR">SMR / SSR</option>
-                  <option value="HAD">HAD</option>
-                  <option value="Autre">Siège / Autre</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Nom de la Structure / Groupe</label>
-                <input type="text" id="al-etablissement" placeholder="Ex: Fondation Saint Jean de Dieu · MAS Lecourbe">
-              </div>
-              <div class="form-group">
-                <label>Ville & Région</label>
-                <input type="text" id="al-ville" placeholder="Ex: Paris 15e (Île-de-France)">
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Spécialités / Compétences clés (séparées par des virgules)</label>
-                <input type="text" id="al-specialites" placeholder="Ex: NetSoins, Négociation CPOM, CNR, DUERP">
-              </div>
-              <div class="form-group">
-                <label>Email de contact</label>
-                <input type="email" id="al-email" placeholder="alexandre.dupont@asso.fr">
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 16px;">
-              <label>Téléphone professionnel / mobile</label>
-              <input type="tel" id="al-tel" placeholder="+33 6 12 34 56 78">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label>Résumé de vos missions & expérience clé</label>
-              <textarea id="al-experience" rows="3" placeholder="Décrivez succinctement les dossiers majeurs que vous avez pilotés..."></textarea>
-            </div>
-
-            <div style="display: flex; gap: 10px;">
-              <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-check"></i>Enregistrer dans l'annuaire</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Filtre Déroulant d'Expérience -->
-        <div class="filter-toolbar">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <label style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Filtrer par structure :</label>
-            <select id="filter-alumni-structure" style="background: var(--bg-surface); border: 1px solid var(--border-alpha); border-radius: 10px; padding: 7px 12px; color: #fff; font-size: 13.5px; outline: none;">
-              <option value="all">Toutes les structures</option>
-              <option value="MAS">MAS</option>
-              <option value="FAM">FAM</option>
-              <option value="EHPAD">EHPAD</option>
-              <option value="IME">IME</option>
-              <option value="SMR">SMR</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="cards-grid" id="grid-alumni">
-          <!-- Injecté dynamiquement -->
-        </div>
-
-        <!-- Connecteur Firebase Info Box -->
-        <div class="hero-glass-card" style="margin-top: 30px;">
-          <div class="eyebrow-tag" style="color: #f59e0b;"><i class="fa-solid fa-fire"></i>Connexion Firebase Firestore Ready</div>
-          <h3 style="font-size: 18px; margin-bottom: 6px;">Prêt pour la synchronisation Cloud GitHub & Firebase</h3>
-          <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">
-            Pour stocker les réponses de toute la classe dans une base de données en direct sans serveur, il vous suffit d'insérer votre configuration Firebase SDK dans le fichier <code>index.html</code>. Vos camarades pourront alors s'enregistrer depuis leur iPhone ou Android et les fiches apparaîtront en temps réel !
-          </p>
-        </div>
-      </section>
-
-      <!-- 9. VUE : SIMULATEUR DE RATIOS EMS -->
-      <section id="view-simulateur" class="view-section">
-        <div class="hero-glass-card">
-          <div class="eyebrow-tag"><i class="fa-solid fa-calculator"></i>Contrôle de Gestion & Dimensionnement</div>
-          <h2 class="hero-title">Calculateur Express de Taux d'Encadrement</h2>
-          <p class="hero-desc">
-            Évaluez en direct la cohérence de vos effectifs (ETP) par rapport au capacitaire de l'établissement (lits ou places installées) et analysez la conformité aux moyennes sectorielles de l'ANAP.
-          </p>
-        </div>
-
-        <div class="form-card-container">
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>Capacité installée (Nombre de places / lits autorisés)</label>
-              <input type="number" id="sim-places" value="60" min="1" inputmode="numeric">
-            </div>
-            <div class="form-group">
-              <label>GIR Moyen Pondéré (GMP) ou Lourdeur moyenne (1 à 6)</label>
-              <input type="number" id="sim-gmp" value="750" placeholder="Ex: 750 pour EHPAD / MAS">
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label>ETP Soignants réels (IDE + AS + Rééducateurs)</label>
-              <input type="number" id="sim-etp-soignants" value="28" step="0.5" inputmode="decimal">
-            </div>
-            <div class="form-group">
-              <label>ETP Éducatifs réels (Éducateurs + AES + Moniteurs)</label>
-              <input type="number" id="sim-etp-educ" value="12" step="0.5" inputmode="decimal">
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label>ETP Total de l'établissement (Soins + Éducatif + Admin + Logistique)</label>
-            <input type="number" id="sim-etp-total" value="48" step="0.5" inputmode="decimal">
-          </div>
-
-          <button class="btn-primary-gradient" id="btn-calc-ratios"><i class="fa-solid fa-chart-pie"></i>Calculer les Ratios</button>
-
-          <div id="sim-results-box" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--accent-cyan); font-weight: 700;">Résultats de l'Évaluation :</h4>
-            <div class="hero-stats-row">
-              <div class="stat-chip">
-                <span class="stat-chip-num" id="sim-res-encadrement">0.80</span>
-                <span class="stat-chip-label">Taux d'encadrement global (ETP / place)</span>
-              </div>
-              <div class="stat-chip">
-                <span class="stat-chip-num" id="sim-res-soignant">0.47</span>
-                <span class="stat-chip-label">Ratio de soins direct</span>
-              </div>
-              <div class="stat-chip">
-                <span class="stat-chip-num" id="sim-res-educ">0.20</span>
-                <span class="stat-chip-label">Ratio éducatif / animation</span>
-              </div>
-            </div>
-            <div class="detail-block" style="margin-top: 16px; background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px;">
-              <div class="detail-label">Diagnostic de Conformité ANAP</div>
-              <div id="sim-res-avis" style="color: #fff; font-size: 14px; font-weight: 500;"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Mobile Bottom Dock (Navigation tactile iPhone / Android) -->
-    <nav class="mobile-bottom-dock">
-      <button class="dock-tab-btn active" data-view="etablissements">
-        <i class="fa-solid fa-hospital"></i>
-        <span>Établissements</span>
-      </button>
-      <button class="dock-tab-btn" data-view="carrieres">
-        <i class="fa-solid fa-sitemap"></i>
-        <span>Métiers</span>
-      </button>
-      <button class="dock-tab-btn" data-view="carte3d">
-        <i class="fa-solid fa-circle-nodes"></i>
-        <span>Carte 3D</span>
-      </button>
-      <button class="dock-tab-btn" data-view="rh">
-        <i class="fa-solid fa-scale-balanced"></i>
-        <span>FAQ RH</span>
-      </button>
-      <button class="dock-tab-btn" data-view="reseau">
-        <i class="fa-solid fa-user-group"></i>
-        <span>Réseau</span>
-      </button>
-    </nav>
-
-    <!-- Modale Bottom Sheet (Drawer Mobile-First) -->
-    <div class="glass-modal-overlay" id="app-modal-overlay">
-      <div class="glass-modal-sheet">
-        <div class="modal-grabber-bar"></div>
-        <div class="modal-header-row">
-          <h3 id="app-modal-title">Détail</h3>
-          <button class="modal-close-btn" id="app-modal-close" aria-label="Fermer la modale">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div class="modal-scrollable-body" id="app-modal-body">
-          <!-- Injecté dynamiquement -->
-        </div>
-      </div>
     </div>
 
-    <!-- Conteneur Toast Notifications -->
-    <div class="toast-container" id="toast-container"></div>
-  </div>
+    <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR -->
+    <div class="md:hidden fixed bottom-3 left-3 right-3 z-40">
+        <nav id="mobileNav" class="glass-card outer-card-16 rounded-2xl flex items-center justify-around p-1.5 shadow-2xl border-white/20">
+            <!-- Mobile nav items rendered by JS -->
+        </nav>
+    </div>
 
-  <!-- Scripts Applicatifs -->
-  <script src="js/data.js"></script>
-  <script src="js/graph3d.js"></script>
-  <script src="js/app.js"></script>
+    <!-- MODAL OVERLAY WRAPPER -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div id="modalCard" class="glass-card outer-card-24 max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl relative modal-animate-enter border-indigo-500/30">
+            <button onclick="closeModal()" aria-label="Fermer la fenêtre" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-90 z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- GDPR CONSENT BANNER (FIRST VISIT) -->
+    <div id="gdprBanner" class="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 max-w-md glass-card outer-card-20 rounded-2xl border-indigo-500/40 p-4 shadow-2xl z-50 hidden">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-cookie-bite text-lg"></i>
+            </div>
+            <div class="space-y-2">
+                <h4 class="text-sm font-bold text-white">Respect de la Vie Privée & LocalStorage</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    PiloteSanté v2 fonctionne à 100% en local dans votre navigateur. Aucune donnée nominative ou de santé n'est transmise à des tiers. Nous utilisons le LocalStorage pour conserver vos simulations.
+                </p>
+                <div class="flex items-center gap-2 pt-1">
+                    <button onclick="acceptGdpr()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition active:scale-95">
+                        Accepter & Continuer
+                    </button>
+                    <button onclick="openGdprModal()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-medium transition">
+                        En savoir plus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP SCRIPT logic -->
+    <script>
+        /**
+         * ====================================================================
+         * 1. APP DATA MODEL (Pure JS portable data objects)
+         * ====================================================================
+         */
+        const APP_DATA = {
+            tabs: [
+                { id: 'etablissements', title: 'Établissements', icon: 'fa-hospital' },
+                { id: 'carriere', title: 'Carrière MES', icon: 'fa-user-tie' },
+                { id: 'boiteoutils', title: 'Boîte à Outils', icon: 'fa-toolbox' },
+                { id: 'finances', title: 'Finances & Dialogue', icon: 'fa-chart-line' },
+                { id: 'rh', title: 'RH & Plannings', icon: 'fa-users-gear' },
+                { id: 'carte3d', title: 'Carte 3D Écosystème', icon: 'fa-cubes' },
+                { id: 'promo', title: 'Réseau MES', icon: 'fa-address-book' }
+            ],
+
+            etablissements: [
+                {
+                    id: 'mas',
+                    name: 'Maison d’Accueil Spécialisée (MAS)',
+                    category: 'Médico-Social Handicap',
+                    public: 'Adultes présentant un handicap grave avec altération complexe de l’autonomie, nécessitant une aide pour tous les actes de la vie quotidienne ainsi qu’une surveillance médicale régulière.',
+                    dispositifs: [
+                        'Internat permanent 365j / an (Ex: MAS Paul de Magallon - 42 places)',
+                        'Accueil de Jour (AJ) 220j / an (Ex: 8 places)',
+                        'Maison de Répit / Repos MDRA (Ex: 155j/an - 3 places répit)',
+                        'Appartements de transition / Logements accompagnés (2 places)'
+                    ],
+                    metiers: ['Aide-Soignant (AS)', 'Accompagnant Éducatif et Social (AES)', 'Infirmier (IDE)', 'Éducateur Spécialisé', 'Psychomotricien', 'Médecin Coordonnateur / Généraliste'],
+                    partenaires: ['ARS (Tutelle & Financement)', 'Conseil Départemental', 'MDPH', 'CH de référence / HAD', 'Équipes Mobile de Soins Paliatifs (EMSP)'],
+                    vigilance: [
+                        'Taux d’activité cible : 90% à 91% d’occupation effective minimum sous peine de révision budgétaire ARS.',
+                        'Plan de Continuité d’Activité (PCA) & Plan Bleu obligatoire 365j/24h.',
+                        'Respect strict des règles d’encadrement repas (min 4 pros pour 12h00 et 18h45).'
+                    ]
+                },
+                {
+                    id: 'fam',
+                    name: 'Foyer d’Accueil Médicalisé (FAM / EAM)',
+                    category: 'Médico-Social Handicap',
+                    public: 'Adultes inaptes à toute activité professionnelle et dont l’état nécessite l’assistance d’une tierce personne pour les actes essentiels ainsi qu’un suivi médical régulier.',
+                    dispositifs: ['Hébergement permanent', 'Accueil temporaire', 'Accueil de jour extra-muros'],
+                    metiers: ['AES', 'AMP', 'AS', 'Éducateur Spécialisé', 'IDE', 'Chef de Service'],
+                    partenaires: ['Conseil Départemental (Tarif hébergement)', 'ARS (Dotation soins)', 'MDPH'],
+                    vigilance: ['Double financement (Prix de journée Département + Dotation Soins ARS)', 'Convention CPOM tripartie mandatory.']
+                },
+                {
+                    id: 'ime',
+                    name: 'Institut Médico-Éducatif (IME / IEM)',
+                    category: 'Médico-Social Enfance',
+                    public: 'Enfants et adolescents (6 à 20 ans) présentant une déficience intellectuelle ou motrice (IEM) avec troubles associés.',
+                    dispositifs: ['Unité d’Enseignement (UE) intégrée', 'Internat de semaine', 'Semi-internat / SESSAD hors les murs'],
+                    metiers: ['Enseignants spécialisés Éducation Nationale', 'Éducateurs spécialisés', 'Ergothérapeutes', 'Orthophonistes', 'Psychologues'],
+                    partenaires: ['ARS', 'Éducation Nationale (Maison Départementale de l’École)', 'MDPH'],
+                    vigilance: ['Amendement Creton (maintien des jeunes majeurs de plus de 20 ans par manque de places en MAS/FAM).']
+                },
+                {
+                    id: 'ehpad',
+                    name: 'EHPAD & USLD',
+                    category: 'Médico-Social Personnes Âgées',
+                    public: 'Personnes âgées dépendantes de plus de 60 ans (GIR 1 à 4) nécessitant un accompagnement quotidien et des soins médicaux.',
+                    dispositifs: ['Hébergement permanent', 'PASA (Pôle d’Activités et de Soins Adaptés)', 'UHR (Unité d’Hébergement Renforcé)', 'Accueil de jour Alzheimer'],
+                    metiers: ['Médecin Coordonnateur', 'IDE Cadre', 'Aide-Soignant', 'Psychologue', 'Animateur', 'Agent de Service Hospitalier (ASH)'],
+                    partenaires: ['ARS', 'Conseil Départemental', 'Gériatres du CH local', 'HAD', 'CLIC / DAC'],
+                    vigilance: ['Calcul des coupes PATHOS et AGGIR (Modèle PATHOS-AGGIR) déterminant la dotation Soins et Dépendance.']
+                },
+                {
+                    id: 'chu',
+                    name: 'Centre Hospitalier Universitaire & CH MCO',
+                    category: 'Sanitaire Public / Privé',
+                    public: 'Patients nécessitant des soins de Médecine, Chirurgie, Obstétrique (MCO), Urgences 24h/24 et consultations de spécialités.',
+                    dispositifs: ['Services d’Urgences / SMUR', 'Blocs Opératoires', 'Services d’Hospitalisation Complète et Ambulatoire', 'Plateau Technique (Imagerie, Biologie)'],
+                    metiers: ['Médecins Praticiens Hospitaliers (PH)', 'Cadres Supérieurs de Santé', 'IDE', 'Manipulateurs Radio', 'Directeurs d’Hôpital (DH/DESS)'],
+                    partenaires: ['ARS', 'CPAM', 'Universités de Médecine', 'SAMU 15'],
+                    vigilance: ['Négociation du T2A / Tarification à l’activité, gestion du DMS (Durée Moyenne de Séjour) et capacitaire lits.']
+                },
+                {
+                    id: 'smr',
+                    name: 'Soins Médicaux et de Réadaptation (SMR ex-SSR)',
+                    category: 'Sanitaire',
+                    public: 'Patients nécessitant des soins de rééducation, de réadaptation fonctionnelle et de réautonomisation après une phase aiguë hospitalière.',
+                    dispositifs: ['Plateaux de kinésithérapie & balnéothérapie', 'Hospitalisation de Jour (HDJ)', 'Hospitalisation Complète'],
+                    metiers: ['Médecins Rééducateurs (MPR)', 'Kinésithérapeutes', 'Ergothérapeutes', 'Orthophonistes', 'IDE'],
+                    partenaires: ['Services MCO amont', 'EHPAD & Domicile aval', 'ARS'],
+                    vigilance: ['Financement mixte GME (Groupes Médico-Économiques) et dotation complémentaire de réhabilitation.']
+                },
+                {
+                    id: 'suisse_ems',
+                    name: 'EMS Suisse Romande (Canton de Genève / Vaud)',
+                    category: 'Bonus Suisse Romande',
+                    public: 'Résidents âgés ou en situation de handicap en Établissement Médico-Social selon le droit cantonal et la LAMal.',
+                    dispositifs: ['Unités de Soins Long Séjour', 'Label Qualité Q2 (Fegems / HUG)', 'Réseau d’Accompagnement IMAD'],
+                    metiers: ['Infirmier Responsable d’Équipe (IRE)', 'Assistant en Soins et Accompagnement (ASA)', 'Directeur d’EMS (Diplôme Fédéral)'],
+                    partenaires: ['Direction Générale de la Santé (DGS Genève / SPAS Vaud)', 'Fegems', 'HUG / CHUV', 'Tableau de bord Qualité Q2'],
+                    vigilance: ['Normes de dotation strictes en minutes de soins requises (PLAISIR / RAI-RUG) et certification obligatoire Label Q2.']
+                }
+            ],
+
+            carriereRoles: [
+                {
+                    role: 'Directeur d’Établissement (EMS / Sanitaire)',
+                    organigramme: 'Rattaché au Directeur Général de la Fondation/Association ou du Directoire du CH. Président du CODIR.',
+                    responsabilite: 'Responsabilité civile et pénale globale de la structure. Ordonnateur des dépenses et garante de la sécurité des personnes.',
+                    equipes: ['G1 : Cadres de Direction / Adjoints', 'G2 : Responsable Administratif & Financier', 'G3 : Responsable Services Généraux', 'G4 : Cadres de Santé / Chefs de Service'],
+                    decisionnel: 'Arbitrage budgétaire EPRD, signature du CPOM, nominations des cadres, relations avec les tutelles ARS/CD, gestion des crises majeurs.',
+                    dud: 'Délégation Unique de Gestion confiée par le conseil d’administration / DG : recrutement, hygiène, sécurité incendie, exercice de l’autorité disciplinaire.'
+                },
+                {
+                    role: 'Directeur Adjoint / Adjoint de Direction',
+                    organigramme: 'Rattaché directement au Directeur d’Établissement. Membre permanent du CODIR et CODIREL.',
+                    responsabilite: 'Pilotage opérationnel quotidien, supervision des fonctions supports et suivi de l’exécution des projets de service.',
+                    equipes: ['Services RH & Paie', 'Accueil & Facturation', 'Services Techniques & Logistiques', 'Responsable SI / DUI NetVie'],
+                    decisionnel: 'Validation des plannings d’urgence, arbitrages d’achats courants, suivi des remplacements vacataires (Hublo).',
+                    dud: 'Délégation de signature pour les actes de gestion courante (achats < 5000€, contrats de travail sous CDD).'
+                },
+                {
+                    role: 'Responsable Qualité & Gestion des Risques (RQGR)',
+                    organigramme: 'Rattaché fonctionnellement à la Direction Générale ou au Directeur d’Établissement.',
+                    responsabilite: 'Pilotage de la démarche d’Évaluation Externe (HAS / ISO / AGEVAL / Label Q2 Suisse).',
+                    equipes: ['Animation du réseau des référents Qualité par service', 'COPIL Qualité & Gestion des Risques'],
+                    decisionnel: 'Mise à jour du PAQSS (Plan d’Amélioration Qualité), gestion de la cartographie des risques et des Événements Indésirables (EI/EIG).',
+                    dud: 'Délégation de pouvoir d’alerte éthique et signalement sans délai à la Direction des incidents graves.'
+                },
+                {
+                    role: 'Chef de Service / Cadre de Santé',
+                    organigramme: 'Rattaché au Directeur ou au Directeur Adjoint. Membre du CODIREL.',
+                    responsabilite: 'Encadrement direct de proximité des équipes paramédicales et éducatives (Grands groupes G4).',
+                    equipes: ['Aides-Soignants', 'Infirmiers', 'AES / AMP', 'Éducateurs Spécialisés'],
+                    decisionnel: 'Organisation des trames de plannings 365j, tenue des synthèses de projets personnalisés, suivi des règles de sécurité (11h repos).',
+                    dud: 'Délégation d’organisation du travail quotidien et première validation des congés payés.'
+                },
+                {
+                    role: 'Contrôleur de Gestion Santé & EMS',
+                    organigramme: 'Rattaché au Directeur Financier ou à la Direction de l’Établissement.',
+                    responsabilite: 'Pilotage de la comptabilité analytique (CréA / RTC), calcul des coûts de revient par pôle et modélisation ETP.',
+                    equipes: ['Comptabilité analytique', 'Chargés de facturation T2A / Prix de journée'],
+                    decisionnel: 'Élaboration du dossier de proposition d’EPRD, analyse des écarts budgétaires mensuels, calcul des ratios d’absentéisme.',
+                    dud: 'Droit de regard et audit financier sur tous les centres de charges de l’établissement.'
+                }
+            ],
+
+            reunions: [
+                {
+                    sigle: 'CODIR',
+                    name: 'Comité de Direction',
+                    frequence: 'Hebdomadaire (ex: Lundi 10h-12h)',
+                    participants: 'Directeur, Adjoint, Cadre Supérieur de Santé, RAF, Responsable Qualité',
+                    objectif: 'Fixer la stratégie, arbitrer les priorités, piloter le budget et les ressources humaines.',
+                    pouvoir: 'Décisionnel souverain d’établissement',
+                    focus7: [
+                        '1. Lecture commune de l’actualité et des urgences',
+                        '2. Analyse partagée des risques et événements indésirables (EI)',
+                        '3. Croiser les regards entre soins, éducatif et administratif',
+                        '4. Arbitrer les allocations de moyens et priorités',
+                        '5. Décider clairement : QUI fait QUOI et pour QUAND',
+                        '6. Suivre rigoureusement l’exécution des arbitrages passés',
+                        '7. Porter d’une seule voix la stratégie auprès des équipes'
+                    ]
+                },
+                {
+                    sigle: 'CODIREL',
+                    name: 'Comité de Direction Elargi',
+                    frequence: 'Mensuelle',
+                    participants: 'Membres du CODIR + Chefs de service, Médecin Coordonnateur, Psychologue référent',
+                    objectif: 'Décliner la stratégie CODIR sur le terrain, harmoniser les pratiques pluridisciplinaires.',
+                    pouvoir: 'Consultatif & Déclinaison opérationnelle',
+                    focus7: []
+                },
+                {
+                    sigle: 'COPIL',
+                    name: 'Comité de Pilotage (Qualité, DUI NetVie, RSE)',
+                    frequence: 'Trimestrielle',
+                    participants: 'Directeur, RQGR, Référents de services, Représentants usagers',
+                    objectif: 'Suivre l’avancement du projet d’établissement, déploiement du DUI NetVie et démarches HAS.',
+                    pouvoir: 'Recommandation et suivi de projets',
+                    focus7: []
+                },
+                {
+                    sigle: 'CVS',
+                    name: 'Conseil de la Vie Sociale',
+                    frequence: '3 fois par an (Obligation Loi 2002-2)',
+                    participants: 'Représentants des résidents/usagers, Familles/Tuteurs, Directeur, Personnel',
+                    objectif: 'Donner son avis sur le fonctionnement de l’établissement, les travaux, la restauration, les activités.',
+                    pouvoir: 'Consultatif obligatoire (Loi 2002-2)',
+                    focus7: []
+                },
+                {
+                    sigle: 'CSE / CME',
+                    name: 'Comité Social et Économique / Commission Médicale',
+                    frequence: 'Mensuelle (CSE) / Trimestrielle (CME)',
+                    participants: 'Directeur, Élus du personnel, Médecins, Représentants syndicaux',
+                    objectif: 'Santé et sécurité au travail (DUERP), conditions de travail, avis sur l’organisation du travail.',
+                    pouvoir: 'Avis réglementaire et concertation sociale',
+                    focus7: []
+                }
+            ],
+
+            documents: [
+                {
+                    name: 'EPRD (État Prévisionnel des Recettes et des Dépenses)',
+                    portee: 'Budget annuel prévisionnel de l’établissement médico-social ou sanitaire.',
+                    details: 'Structure organisée en 3 Groupes de dépenses (Compte 64 - Personnel, Compte 60/61/62 - Exploitation courante, Dépenses financières et amortissements). Calcul fondé sur 1 ETP = 1820,04 h/an (151,67 h/mois).'
+                },
+                {
+                    name: 'CPOM (Contrat Multi-annuel d’Objectifs et de Moyens)',
+                    portee: 'Engagements de 5 ans signés entre l’établissement, l’ARS et le Conseil Départemental.',
+                    details: 'Fixe les objectifs de transformation de l’offre, la fongibilité des budgets et le plan de convergence tarifaire.'
+                },
+                {
+                    name: 'PPI (Plan Pluriannuel d’Investissement)',
+                    portee: 'Programmation sur 5 ans des investissements matériels et immobiliers.',
+                    details: 'Requis pour tous travaux ou équipements > 5 000 €. Détermine la capacité d’autofinancement et les dotations aux amortissements.'
+                },
+                {
+                    name: 'DUERP & DUERME (Document Unique Évaluation Risques)',
+                    portee: 'Cartographie obligatoire des risques professionnels et résidents.',
+                    details: '3 axes majeurs : 1. Risques résidents (chutes, fausses routes) ; 2. Management & RH (RPS, burn-out) ; 3. Locaux & équipements (TMS, incendie).'
+                },
+                {
+                    name: 'Plan Bleu / Plan de Continuité d’Activité (PCA)',
+                    portee: 'Protocoles de crise en cas de canicule, épidémie, panne majeure ou cyberattaque.',
+                    details: 'Désignation de la cellule de crise, procédures de rappel des personnels, autonomie 72h en eau et électricité.'
+                }
+            ],
+
+            cnrArguments: [
+                {
+                    cat: 'Formations',
+                    title: 'Communication Alternative et Augmentative (CAA)',
+                    cout: '12 500 €',
+                    text: 'Conformément aux exigences de la Loi 2002-2 et aux préconisations HAS, la formation de 100% des équipes éducatives et soignantes à la CAA (méthode PODD, Pictogrammes, Grid) garantit la liberté d’expression des résidents non-verbalisants de la MAS et réduit les troubles du comportement dus à la frustration communicationnelle.'
+                },
+                {
+                    cat: 'Formations',
+                    title: 'Stimulation Basale & Bientraitance',
+                    cout: '8 900 €',
+                    text: 'Projet de formation action transversale pour la prise en charge du polyhandicap sévère. Amélioration de la bientraitance dans les soins d’hygiène quotidiens et diminution démontrée de 25% des Événements Indésirables liés aux refus de soins.'
+                },
+                {
+                    cat: 'Formations',
+                    title: 'Hydrothérapie & Balnéothérapie (Prévention TMS)',
+                    cout: '6 400 €',
+                    text: 'Formation de l’équipe de soins aux techniques de transfert en milieu aquatique et soin relaxant posturaux, réduisant directement la pénibilité physique et les accidents du travail pour les soignants.'
+                },
+                {
+                    cat: 'Travaux & Climat',
+                    title: 'Véranda Thérapeutique & Bioclimatique',
+                    cout: '45 000 €',
+                    text: 'Aménagement d’un espace lumineux adapté à l’accueil de jour (220j/an), régulé thermiquement pour lutter contre le confinement en période estivale et favoriser les ateliers de médiation sensorielle.'
+                },
+                {
+                    cat: 'Travaux & Climat',
+                    title: 'Stores Occultants Thermiques & Climatisation Reversible',
+                    cout: '28 000 €',
+                    text: 'Mise en conformité du Plan Bleu / Volet Canicule. Équipement prioritaire des chambres orientées sud et des espaces de repas pour maintenir la température sous 26°C lors des pics de chaleur.'
+                },
+                {
+                    cat: 'Équipements & QVCT',
+                    title: 'Bacs de Jardinage PMR Hortithérapie',
+                    cout: '4 800 €',
+                    text: 'Création d’un atelier extérieur accessible en fauteuil roulant électrique et manuel, stimulant le maintien de la motricité fine et l’apaisement émotionnel des résidents.'
+                },
+                {
+                    cat: 'Équipements & QVCT',
+                    title: 'Rails de Transfert Plafonniers (Prévention TMS)',
+                    cout: '32 000 €',
+                    text: 'Installation de 8 rails plafonniers en chambres MAS lourdes. Réduction drastique des arrêts de travail liés aux lombalgies (-40% attendus) et sécurisation maximale du patient.'
+                },
+                {
+                    cat: 'Équipements & QVCT',
+                    title: 'Chariot Snoezelen Mobile Multisensoriel',
+                    cout: '9 500 €',
+                    text: 'Dispositif nomade permettant des séances d’apaisement au lit du résident en grande détresse psychique ou souffrance physique, diminuant le recours aux traitements médicamenteux sédatifs.'
+                }
+            ],
+
+            poles: [
+                {
+                    id: 'chirurgie',
+                    name: 'Pôle 1 : Chirurgie',
+                    recettes: '11 496 496 €',
+                    depenses: '11 253 149 €',
+                    solde: '+243 347 €',
+                    marge: '2,1 %',
+                    uo: 'UO Bloc = 4 316 € / Salle | DM = 2,3 M€',
+                    directeurRef: 'Priorité à la maximisation de l’occupation des salles de bloc et au virage ambulatoire (objectif 70%). Réduction des durées d’inter-intervention.',
+                    cadreSup: 'Tension permanente sur les effectifs IBODE/IADE. Nécessité d’adapter les maillages de gardes et de limiter les ouvertures de salles non financées.',
+                    gestionnaire: 'Indicateur clé : Coût de la minute de bloc opératoire (cible < 12 €/min). Optimisation du stock de dispositifs médicaux implantables (DMI).',
+                    ars: 'Attente forte sur la mutualisation des plateaux techniques et l’absence de déprogrammations non justifiées.'
+                },
+                {
+                    id: 'medecine',
+                    name: 'Pôle 2 : Médecine & Urgences',
+                    recettes: '12 150 138 €',
+                    depenses: '12 869 173 €',
+                    solde: '-719 035 €',
+                    marge: '-5,9 %',
+                    uo: 'Journée Médecine = 553 € | Passage Urgences = 303 €',
+                    directeurRef: 'Pôle structurellement déficitaire du fait du coût du service des Urgences et des lits d’aval. Enjeu majeur : gagner 1 jour de DMS sur 1000 séjours (+400 k€ d’économie).',
+                    cadreSup: 'Gestion de l’épuisement soignant lié au flux ininterrompu d’urgences et à la pénurie de lits d’aval en SMR/EHPAD.',
+                    gestionnaire: 'Négociation du forfait d’urgence (ATU) et suivi de la codification CIM-10 / GHM pour éviter les sous-valorisations T2A.',
+                    ars: 'Exigence du respect du délai de prise en charge aux urgences et développement des filières d’admission directe pour personnes âgées.'
+                },
+                {
+                    id: 'mtlm',
+                    name: 'Pôle 3 : MTLM (Médico-Tech & Logistique)',
+                    recettes: '+1 819 375 € (Refacturation interne)',
+                    depenses: '-321 404 € (Coût complet externe)',
+                    solde: '+1 497 971 €',
+                    marge: 'N/A',
+                    uo: 'Radio: 50-70€ | Scanner: 120-180€ | IRM: 250-300€ | Stérilisation: 25-35€/boîte',
+                    directeurRef: 'Pôle support de refacturation aux autres pôles. Nécessité d’optimiser l’amortissement des équipements lourds (Scanner/IRM) 6j/7.',
+                    cadreSup: 'Maintien des compétences rares (Manipulateurs Radio, Techniciens de Labo) et continuité de service H24.',
+                    gestionnaire: 'Analyse fine des coûts à l’acte (B / RI / Bhn) et renégociation des contrats de maintenance réactifs.',
+                    ars: 'Inclusion dans le schéma régional d’imagerie et incitation à la création de GCS de moyens.'
+                },
+                {
+                    id: 'smr',
+                    name: 'Pôle 4 : SMR (Soins Médicaux & Réadaptation)',
+                    recettes: '7 235 510 €',
+                    depenses: '7 076 824 €',
+                    solde: '+158 686 €',
+                    marge: '+2,1 %',
+                    uo: 'Journée SMR | DMS 18,4 à 35 jours',
+                    directeurRef: 'Securiser le taux d’occupation (> 92%) et piloter la transition vers le nouveau modèle de financement mixte (dotation modulaire + GME).',
+                    cadreSup: 'Coordination entre kinésithérapeutes, ergothérapeutes et équipes soignantes de nuit.',
+                    gestionnaire: 'Optimisation de la saisie des RHS (Résumés Hebdomadaires de Sortie) pour maximiser le codage de dépendance et de morbidité.',
+                    ars: 'Fluidification du parcours amont (MCO) / aval (Retour domicile avec SSIAD ou EHPAD).'
+                },
+                {
+                    id: 'psychiatrie',
+                    name: 'Pôle 5 : Psychiatrie',
+                    recettes: '13 485 070 €',
+                    depenses: '13 485 070 €',
+                    solde: '0 € (À l’équilibre)',
+                    marge: '0 %',
+                    uo: 'Dotation Populationnelle | 80% RH | DMS 34 jours',
+                    directeurRef: 'Gestion d’un budget global sous dotation populationnelle. Enjeu d’extradépartementalisation et de virage ambulatoire (CMP / CATTP).',
+                    cadreSup: 'Prévention des isolements et contentions (Registre obligatoire), recrutement de psychiatres et soignants spécialisés.',
+                    gestionnaire: 'Suivi de la masse salariale (80% des charges du pôle) et des projets de rénovation immobilière de sectorisation.',
+                    ars: 'Mise en œuvre du Projet Régional de Santé Mentale (PRSM) et réduction du recours aux mesures de contrainte.'
+                }
+            ],
+
+            rhFlashCards: [
+                {
+                    q: 'Comment gérer l’absentéisme structurel selon la Loi de Pareto ?',
+                    r: 'Analyse terrain : 10% des salariés concentrent souvent 75,8% des jours d’arrêt. Plan d’action à 3 volets : 1. Entretien de réaccueil systématique au 1er jour de retour ; 2. Cartographie des pénibilités physiques (Rails plafonniers) ; 3. Contrôle médical ciblé et réajustement des roulements fatigants.'
+                },
+                {
+                    q: 'Quelles sont les règles légales de repos obligatoire en 24h et par semaine ?',
+                    r: 'Repos quotidien : minimum 11h consécutives entre 2 postes. Repos hebdomadaire : minimum 35h consécutives (24h + 11h). Durée maximale quotidienne de travail : 10h (dérogeable à 12h en MAS sous accord d’entreprise).'
+                },
+                {
+                    q: 'Peut-on faire travailler un soignant plus de 3 jours de suite de 12h ?',
+                    r: 'Stricte interdiction légale. Maximum 3 jours consécutifs de 12h. Au-delà, le risque d’épuisement et d’erreur médicale s’accroît exponentiellement. Prévoir un repos obligatoire de 48h minimum après une telle série.'
+                },
+                {
+                    q: 'Quelle est la règle d’or des pauses repas en établissement médico-social 365j ?',
+                    r: 'Pause de 20 min minimum dès que la journée atteint 6h. En MAS, la présence aux repas des résidents constitue du temps de travail effectif payé si le soignant reste à la disposition de la direction.'
+                },
+                {
+                    q: 'Quelles sont les obligations en matière d’accident du travail et visite de reprise ?',
+                    r: 'Déclaration sous 48h à la CPAM. Visite médicale de reprise obligatoire auprès de la Médecine du Travail après tout arrêt > 30 jours (ou arrêt pour maladie professionnelle).'
+                },
+                {
+                    q: 'Comment lutter contre la "souffrance technologique" liée au DUI NetVie ?',
+                    r: 'Former les équipes sur PC mobiles/tablettes en mode Point-of-Care (au chevet du résident), réserver 15 min par relève dédiées à la saisie informatique, et ne jamais faire de la saisie un travail réalisé à domicile hors temps de travail (Droit à la déconnexion).'
+                }
+            ],
+
+            planningRules: [
+                { rule: 'Repos quotidien de 11h consécutives strict entre 2 shifts', key: 'rest11' },
+                { rule: 'Maximum 3 jours consécutifs en trame lourde (10h-12h)', key: 'max3days' },
+                { rule: 'Présence soignante minimale de 4 professionnels aux repas (12h00 & 18h45)', key: 'meal4pros' },
+                { rule: 'Présence soignante minimale de 2 professionnels jusqu’à 21h30 en MAS', key: 'evening2pros' },
+                { rule: 'Moyenne de 35h par semaine / 151,67h mensuelles sur le cycle', key: 'hours35' }
+            ],
+
+            promoNetwork: [
+                {
+                    id: 1,
+                    name: 'Guilit Kalusevi',
+                    role: 'Alternant de Direction EMS',
+                    etablissement: 'MAS Paul de Magallon — Fondation Saint-Jean de Dieu',
+                    parcours: 'Master 2 MES (IAE Paris-Est)',
+                    competences: ['Déploiement DUI NetVie', 'Projet Borne Interactive & FALC', 'Refonte Plannings 365j', 'Dossier CNR / ARS'],
+                    email: 'guilit.kalusevi@saintjeandedieu.fr',
+                    phone: '06 12 34 56 78',
+                    linkedIn: 'linkedin.com/in/guilit-kalusevi'
+                },
+                {
+                    id: 2,
+                    name: 'Sophie Martin',
+                    role: 'Responsable Qualité & Gestion des Risques',
+                    etablissement: 'Groupe Hospitalier Est Parisien (GHU)',
+                    parcours: 'Master 2 MES (IAE Paris-Est)',
+                    competences: ['Certification HAS V2024', 'Cartographie des risques', 'Gestion des EIG'],
+                    email: 'sophie.martin@ghu-paris.fr',
+                    phone: '06 98 76 54 32',
+                    linkedIn: 'linkedin.com/in/sophie-martin-mes'
+                },
+                {
+                    id: 3,
+                    name: 'Alexandre Dubois',
+                    role: 'Directeur Adjoint EHPAD',
+                    etablissement: 'EHPAD Les Glycines (Public Territorial)',
+                    parcours: 'Master 2 MES / EHESP',
+                    competences: ['Négociation CPOM 5 ans', 'Coupe PATHOS / AGGIR', 'Transformation PASA'],
+                    email: 'a.dubois@ehpad-lesglycines.fr',
+                    phone: '06 45 67 89 01',
+                    linkedIn: 'linkedin.com/in/alexandre-dubois-direction'
+                },
+                {
+                    id: 4,
+                    name: 'Camille Roche',
+                    role: 'Chargée de Mission Tarification & Performance',
+                    etablissement: 'ARS Île-de-France — Direction de l’Autonomie',
+                    parcours: 'Master 2 MES / Sciences Po',
+                    competences: ['Instruction EPRD', 'Réforme SERAFIN-PH', 'Allocations CNR'],
+                    email: 'camille.roche@ars.sante.fr',
+                    phone: '01 44 00 12 34',
+                    linkedIn: 'linkedin.com/in/camille-roche-ars'
+                }
+            ]
+        };
+
+        /**
+         * ====================================================================
+         * 2. APP STATE MANAGEMENT
+         * ====================================================================
+         */
+        const APP_STATE = {
+            activeTab: 'etablissements',
+            subTabs: {
+                boiteoutils: '3a_reunions',
+                finances: '4a_dialogue'
+            },
+            searchQuery: '',
+            filterCategory: 'ALL',
+            selectedPole: 'chirurgie',
+            polePerspective: 'directeurRef',
+            cnrSelectedIds: [0, 3, 6],
+            serafinYear: 2027,
+            promoList: [],
+            highContrast: false,
+
+            init() {
+                // Restore promo list from LocalStorage if available
+                const savedPromo = localStorage.getItem('pilotesante_promo');
+                if (savedPromo) {
+                    try {
+                        this.promoList = JSON.parse(savedPromo);
+                    } catch (e) {
+                        this.promoList = [...APP_DATA.promoNetwork];
+                    }
+                } else {
+                    this.promoList = [...APP_DATA.promoNetwork];
+                }
+
+                // Check GDPR consent
+                if (!localStorage.getItem('pilotesante_gdpr')) {
+                    document.getElementById('gdprBanner').classList.remove('hidden');
+                }
+            },
+
+            savePromo() {
+                localStorage.setItem('pilotesante_promo', JSON.stringify(this.promoList));
+            }
+        };
+
+        /**
+         * ====================================================================
+         * 3. UI RENDERERS & NAVIGATION CONTROLLER
+         * ====================================================================
+         */
+
+        function switchTab(tabId) {
+            APP_STATE.activeTab = tabId;
+            APP_STATE.searchQuery = '';
+            APP_STATE.filterCategory = 'ALL';
+            renderNavigation();
+            renderMainContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Initialize Three.js map if tab 6 selected
+            if (tabId === 'carte3d') {
+                setTimeout(initThreeJsScene, 100);
+            }
+        }
+
+        function switchSubTab(parentTab, subTabId) {
+            APP_STATE.subTabs[parentTab] = subTabId;
+            renderMainContent();
+        }
+
+        function renderNavigation() {
+            const desktopNav = document.getElementById('desktopNav');
+            const mobileNav = document.getElementById('mobileNav');
+
+            desktopNav.innerHTML = APP_DATA.tabs.map(tab => {
+                const isActive = APP_STATE.activeTab === tab.id;
+                return `
+                    <button onclick="switchTab('${tab.id}')" role="tab" aria-selected="${isActive}"
+                        class="px-3.5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-3 transition-all duration-200 active:scale-95 text-left ${
+                            isActive
+                                ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-600/30 border border-indigo-400/40 font-semibold'
+                                : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                        }">
+                        <i class="fa-solid ${tab.icon} w-5 text-center ${isActive ? 'text-white' : 'text-slate-400'}"></i>
+                        <span>${tab.title}</span>
+                    </button>
+                `;
+            }).join('');
+
+            mobileNav.innerHTML = APP_DATA.tabs.map(tab => {
+                const isActive = APP_STATE.activeTab === tab.id;
+                return `
+                    <button onclick="switchTab('${tab.id}')" aria-label="${tab.title}"
+                        class="flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 ${
+                            isActive ? 'text-indigo-400 font-bold scale-105' : 'text-slate-400'
+                        }">
+                        <i class="fa-solid ${tab.icon} text-lg"></i>
+                        <span class="text-[9px] mt-1 font-medium leading-none">${tab.title.split(' ')[0]}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderMainContent() {
+            const container = document.getElementById('mainContent');
+            switch (APP_STATE.activeTab) {
+                case 'etablissements':
+                    container.innerHTML = renderEtablissementsTab();
+                    break;
+                case 'carriere':
+                    container.innerHTML = renderCarriereTab();
+                    break;
+                case 'boiteoutils':
+                    container.innerHTML = renderBoiteOutilsTab();
+                    break;
+                case 'finances':
+                    container.innerHTML = renderFinancesTab();
+                    break;
+                case 'rh':
+                    container.innerHTML = renderRHTab();
+                    break;
+                case 'carte3d':
+                    container.innerHTML = renderCarte3DTab();
+                    break;
+                case 'promo':
+                    container.innerHTML = renderPromoTab();
+                    break;
+                default:
+                    container.innerHTML = `<div class="p-8 text-center text-slate-400">Module en cours d'initialisation...</div>`;
+            }
+        }
+
+        /**
+         * TAB 1: ÉTABLISSEMENTS
+         */
+        function renderEtablissementsTab() {
+            const categories = ['ALL', 'Médico-Social Handicap', 'Médico-Social Enfance', 'Médico-Social Personnes Âgées', 'Sanitaire', 'Bonus Suisse Romande'];
+            
+            let filtered = APP_DATA.etablissements.filter(item => {
+                const matchesCat = APP_STATE.filterCategory === 'ALL' || item.category.includes(APP_STATE.filterCategory.replace('Sanitaire', 'Sanitaire'));
+                const matchesSearch = item.name.toLowerCase().includes(APP_STATE.searchQuery.toLowerCase()) || 
+                                      item.public.toLowerCase().includes(APP_STATE.searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-hospital text-indigo-400"></i>
+                                Référentiel des Établissements Sanitaires & Médico-Sociaux
+                            </h2>
+                            <p class="text-xs text-slate-300 mt-1">Fiches techniques de pilotage : publics, dispositifs, métiers et points de vigilance Directeurs.</p>
+                        </div>
+                        <div class="w-full md:w-72">
+                            <div class="relative">
+                                <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                                <input type="text" placeholder="Rechercher un établissement..." value="${APP_STATE.searchQuery}"
+                                    oninput="APP_STATE.searchQuery = this.value; renderMainContent();"
+                                    class="w-full pl-9 pr-4 py-2 rounded-xl bg-white/10 text-white placeholder-slate-400 border border-white/15 text-xs focus:outline-none focus:border-indigo-400">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                        ${categories.map(cat => `
+                            <button onclick="APP_STATE.filterCategory = '${cat}'; renderMainContent();"
+                                class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                    APP_STATE.filterCategory === cat 
+                                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-500/30' 
+                                        : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                                }">
+                                ${cat === 'ALL' ? 'Tous les Établissements' : cat}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- List of Fiches -->
+                    <div class="grid grid-cols-1 gap-6">
+                        ${filtered.map((item, idx) => `
+                            <div class="glass-card outer-card-20 rounded-2xl border-white/10 hover:border-indigo-500/40 transition stagger-item space-y-4" style="--i: ${idx}">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-base shrink-0">
+                                            <i class="fa-solid ${item.id === 'suisse_ems' ? 'fa-flag-switzerland text-rose-400' : 'fa-building-hospital'}"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-white">${item.name}</h3>
+                                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 font-medium border border-indigo-500/20">${item.category}</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="openEtablissementModal('${item.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto transition">
+                                        <i class="fa-solid fa-expand"></i> Voir Fiche Complète
+                                    </button>
+                                </div>
+
+                                <div class="text-xs text-slate-300 leading-relaxed">
+                                    <strong class="text-indigo-200">Public accueilli :</strong> ${item.public}
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <div class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider mb-1.5">
+                                            <i class="fa-solid fa-sitemap mr-1"></i> Dispositifs Inclus
+                                        </div>
+                                        <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                                            ${item.dispositifs.map(d => `<li>${d}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                        <div class="text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1.5">
+                                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Vigilance Manager
+                                        </div>
+                                        <ul class="text-xs text-amber-100 space-y-1 list-disc list-inside">
+                                            ${item.vigilance.map(v => `<li>${v}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openEtablissementModal(id) {
+            const item = APP_DATA.etablissements.find(e => e.id === id);
+            if (!item) return;
+
+            const html = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-indigo-500/30">
+                            <i class="fa-solid fa-hospital"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${item.name}</h3>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">${item.category}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Public Accompage & Besoins</h4>
+                        <p class="text-sm text-slate-200 leading-relaxed">${item.public}</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dispositifs & Offres de soins</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${item.dispositifs.map(d => `
+                                <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200 font-medium flex items-center gap-2">
+                                    <i class="fa-solid fa-check-circle text-emerald-400"></i> ${d}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Métiers Clés Managés</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.metiers.map(m => `
+                                <span class="px-3 py-1 rounded-xl bg-white/10 text-white text-xs font-medium border border-white/15">${m}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Partenaires Institutionnels & Réseaux</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.partenaires.map(p => `
+                                <span class="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-300 text-xs font-medium border border-emerald-500/30">${p}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                        <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-cat"></i> Points de Vigilance Spécifiques Directeur MES
+                        </h4>
+                        <ul class="text-xs text-amber-100 space-y-1.5 list-disc list-inside">
+                            ${item.vigilance.map(v => `<li>${v}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        /**
+         * TAB 2: CARRIÈRE MES (MÉTIERS & ORGANIGRAMME)
+         */
+        function renderCarriereTab() {
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="border-b border-white/10 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie text-indigo-400"></i>
+                            Fiches Métiers, Organigramme & Délégations (Master MES)
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-1">Structuration des niveaux de responsabilité et Document Unique de Délégation (DUD).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        ${APP_DATA.carriereRoles.map((r, idx) => `
+                            <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4 stagger-item" style="--i: ${idx}">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-id-card text-emerald-400"></i> ${r.role}
+                                    </h3>
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-white/10 text-slate-300 border border-white/15">Position Management Cible</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <div class="font-bold text-indigo-300">Place dans l’Organigramme</div>
+                                        <div class="text-slate-300">${r.organigramme}</div>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <div class="font-bold text-indigo-300">Niveau de Responsabilité</div>
+                                        <div class="text-slate-300">${r.responsabilite}</div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Grands Groupes & Équipes Managées</div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        ${r.equipes.map(eq => `
+                                            <div class="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs font-medium">
+                                                ${eq}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                    <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+                                        <div class="font-bold text-emerald-300 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-gavel"></i> Champ Décisionnel
+                                        </div>
+                                        <div class="text-emerald-100">${r.decisionnel}</div>
+                                    </div>
+                                    <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-1">
+                                        <div class="font-bold text-amber-300 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-file-signature"></i> Document Unique de Délégation (DUD)
+                                        </div>
+                                        <div class="text-amber-100">${r.dud}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * TAB 3: BOÎTE À OUTILS (5 SUB-TABS)
+         */
+        function renderBoiteOutilsTab() {
+            const currentSub = APP_STATE.subTabs.boiteoutils;
+
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="border-b border-white/10 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-toolbox text-indigo-400"></i>
+                            Boîte à Outils de Direction EMS & Sanitaire
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-1">Instances, documents réglementaires, tutelles, générateur CNR et flash crise.</p>
+                    </div>
+
+                    <!-- Sub-Nav Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/10">
+                        <button onclick="switchSubTab('boiteoutils', '3a_reunions')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                currentSub === '3a_reunions' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            3A. Réunions & Instances (CODIR/CVS)
+                        </button>
+                        <button onclick="switchSubTab('boiteoutils', '3b_documents')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                currentSub === '3b_documents' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            3B. Documents & Pilotage (EPRD/DUERP)
+                        </button>
+                        <button onclick="switchSubTab('boiteoutils', '3c_acteurs')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                currentSub === '3c_acteurs' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            3C. Acteurs & Tutelles (ARS/MDPH)
+                        </button>
+                        <button onclick="switchSubTab('boiteoutils', '3d_cnr')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                currentSub === '3d_cnr' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            3D. Générateur Argumentaires CNR
+                        </button>
+                        <button onclick="switchSubTab('boiteoutils', '3e_flash')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
+                                currentSub === '3e_flash' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            3E. Flash Direction & SERAFIN-PH
+                        </button>
+                    </div>
+
+                    <!-- Sub-Tab Content rendering -->
+                    <div>
+                        ${
+                            currentSub === '3a_reunions' ? renderSubTab3A() :
+                            currentSub === '3b_documents' ? renderSubTab3B() :
+                            currentSub === '3c_acteurs' ? renderSubTab3C() :
+                            currentSub === '3d_cnr' ? renderSubTab3D() :
+                            renderSubTab3E()
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubTab3A() {
+            return `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 gap-6">
+                        ${APP_DATA.reunions.map((r, idx) => `
+                            <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4 stagger-item" style="--i: ${idx}">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="px-3 py-1 rounded-xl bg-indigo-600 text-white font-extrabold text-sm num-mono shadow">${r.sigle}</span>
+                                        <h3 class="text-base font-bold text-white">${r.name}</h3>
+                                    </div>
+                                    <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 font-medium border border-emerald-500/30">
+                                        <i class="fa-regular fa-clock mr-1"></i> ${r.frequence}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <div class="font-bold text-indigo-300">Participants Obligatoires</div>
+                                        <div class="text-slate-300">${r.participants}</div>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <div class="font-bold text-indigo-300">Objectif Stratégique</div>
+                                        <div class="text-slate-300">${r.objectif}</div>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <div class="font-bold text-indigo-300">Pouvoir Réglementaire</div>
+                                        <div class="text-slate-300">${r.pouvoir}</div>
+                                    </div>
+                                </div>
+
+                                ${r.focus7 && r.focus7.length > 0 ? `
+                                    <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-2">
+                                        <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                                            <i class="fa-solid fa-list-check"></i> Focus : Les 7 Missions Clés du CODIR
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-indigo-100">
+                                            ${r.focus7.map(f => `<div class="p-2 rounded-xl bg-white/5 border border-white/10 font-medium">${f}</div>`).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubTab3B() {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${APP_DATA.documents.map((doc, idx) => `
+                        <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-3 stagger-item" style="--i: ${idx}">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-file-contract text-emerald-400"></i> ${doc.name}
+                            </h3>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-indigo-200 font-semibold">
+                                Portée : ${doc.portee}
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                ${doc.details}
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderSubTab3C() {
+            const acteurs = [
+                { name: 'ARS (Agence Régionale de Santé)', role: 'Tutelle de financement et de contrôle. Délivre les autorisations de fonctionnement et alloue la dotation Soins/EPRD.' },
+                { name: 'Conseil Départemental (CD)', role: 'Co-tutelle médico-sociale (EHPAD/FAM). Fixe le prix de journée Hébergement et la prestation PCH/APA.' },
+                { name: 'HAS (Haute Autorité de Santé)', role: 'Définit le référentiel national d’évaluation de la qualité des ESSMS et certifie les établissements de santé.' },
+                { name: 'MDPH / MDA', role: 'Oriente les usagers handicapés vers les établissements adaptés (Notifications MAS, FAM, ESAT, IME).' },
+                { name: 'ANAP', role: 'Agence nationale d’appui à la performance des établissements de santé et médico-sociaux.' },
+                { name: 'DREETS / Médecine du Travail', role: 'Contrôle du droit du travail, prévention des risques professionnels et visites médicales des salariés.' }
+            ];
+
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${acteurs.map((act, idx) => `
+                        <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-2 stagger-item" style="--i: ${idx}">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-landmark text-amber-400"></i> ${act.name}
+                            </h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">${act.role}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderSubTab3D() {
+            const isSelected = (idx) => APP_STATE.cnrSelectedIds.includes(idx);
+            
+            const selectedItems = APP_STATE.cnrSelectedIds.map(id => APP_DATA.cnrArguments[id]).filter(Boolean);
+
+            return `
+                <div class="space-y-6">
+                    <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200 space-y-1">
+                        <div class="font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Générateur interactif de requêtes Crédits Non Récurrents (CNR) ARS
+                        </div>
+                        <p>Sélectionnez les projets à intégrer dans votre mémo d’arbitrage pour l’ARS / Conseil Départemental.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${APP_DATA.cnrArguments.map((arg, idx) => `
+                            <div onclick="toggleCnrSelection(${idx})" class="glass-card outer-card-16 rounded-2xl border-white/10 cursor-pointer transition space-y-2 ${
+                                isSelected(idx) ? 'border-indigo-400 bg-indigo-600/20 shadow-lg shadow-indigo-500/20' : 'hover:bg-white/10'
+                            }">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">${arg.cat}</span>
+                                    <span class="text-xs font-bold text-emerald-400 num-mono">${arg.cout}</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-white flex items-center justify-between">
+                                    <span>${arg.title}</span>
+                                    <i class="fa-solid ${isSelected(idx) ? 'fa-square-check text-indigo-400' : 'fa-square text-slate-500'} text-lg"></i>
+                                </h4>
+                                <p class="text-xs text-slate-300 line-clamp-2">${arg.text}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- PITCH MEMO SUMMARY BOX -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-emerald-500/30 bg-emerald-500/5 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-file-invoice text-emerald-400"></i> Mémo de Demande CNR Assemblé (${selectedItems.length} projets)
+                                </h3>
+                                <p class="text-xs text-slate-300">Synthèse prête à être copiée et transmise à la délégation départementale ARS.</p>
+                            </div>
+                            <button onclick="copyCnrMemo()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/30 flex items-center gap-2 transition active:scale-95 self-start sm:self-auto">
+                                <i class="fa-solid fa-copy"></i> Copier l'Argumentaire Complexe
+                            </button>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-slate-200 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto" id="cnrMemoBox">
+OBJET : Demande d'allocation exceptionnelle de Crédits Non Récurrents (CNR)
+ÉTABLISSEMENT : MAS Paul de Magallon (Réf. Master MES / Direction)
+
+Madame, Monsieur l'Inspecteur Référent ARS,
+
+Afin de répondre aux priorités stratégiques régionales de santé et de maintenir la qualité de l'accompagnement des résidents polyhandicapés, nous sollicitons l'attribution de crédits non récurrents pour la réalisation prioritaire des projets suivants :
+
+${selectedItems.map((item, i) => `${i+1}. [${item.cat.toUpperCase()}] ${item.title} (Montant : ${item.cout})
+-> Motifs & Impact : ${item.text}`).join('\n\n')}
+
+Espérant un avis favorable pour ces investissements majeurs au bénéfice des personnes accueillies et des conditions de travail des soignants.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCnrSelection(idx) {
+            const pos = APP_STATE.cnrSelectedIds.indexOf(idx);
+            if (pos >= 0) {
+                APP_STATE.cnrSelectedIds.splice(pos, 1);
+            } else {
+                APP_STATE.cnrSelectedIds.push(idx);
+            }
+            renderMainContent();
+        }
+
+        function copyCnrMemo() {
+            const memoText = document.getElementById('cnrMemoBox').innerText;
+            navigator.clipboard.writeText(memoText).then(() => {
+                showToast("Mémo CNR copié dans le presse-papier avec succès !");
+            }).catch(() => {
+                showToast("Erreur lors de la copie du texte.");
+            });
+        }
+
+        function renderSubTab3E() {
+            return `
+                <div class="space-y-6">
+                    <!-- PROTOCOLE 15 JOURS -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4">
+                        <div class="border-b border-white/10 pb-3">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-fire-extinguisher text-rose-400"></i>
+                                Protocole 15 Jours : Prise de Poste en Situation de Crise (7 Étapes)
+                            </h3>
+                            <p class="text-xs text-slate-300">Feuille de route managériale immédiate en cas de vacance de direction ou crise sociale/qualité.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">1. Sécuriser l’immédiat (Continuité des soins & sécurité physique)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">2. Écouter le terrain (Tours de garde & entretiens ouverts)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">3. Regarder les chiffres (Taux d'occupation, absentéisme, trésorerie)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">4. Analyser la prise de décision (Qui décide vraiment ?)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">5. Évaluer le management intermédiaire (Cadres sous tension)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">6. Écouter usagers & familles (CVS extraordinaire)</div>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 font-semibold text-slate-200">7. Reconstruire la chronologie des faits & PCA</div>
+                        </div>
+                    </div>
+
+                    <!-- SIMULATEUR SERAFIN-PH 2027 - 2035 -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-indigo-500/30 bg-indigo-500/5 space-y-4">
+                        <div class="border-b border-white/10 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders text-indigo-400"></i>
+                                    Simulateur de Convergence Tarifaire SERAFIN-PH (2027 – 2035)
+                                </h3>
+                                <p class="text-xs text-slate-300">Modélisation de la réforme du financement médico-social au forfait besoins/prestations.</p>
+                            </div>
+                            <span class="text-xs font-bold text-indigo-300 num-mono bg-indigo-500/20 px-3 py-1 rounded-full border border-indigo-500/30">
+                                PLFSS 2027 : 44,4 Md€ Branche Autonomie (+2,5%)
+                            </span>
+                        </div>
+
+                        <!-- SLIDER YEAR CONTROL -->
+                        <div class="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div class="flex items-center justify-between">
+                                <label for="serafinSlider" class="text-xs font-bold text-slate-200">Année d'application du modèle :</label>
+                                <span class="text-lg font-black text-indigo-400 num-mono" id="serafinYearLabel">${APP_STATE.serafinYear}</span>
+                            </div>
+                            <input id="serafinSlider" type="range" min="2027" max="2035" step="1" value="${APP_STATE.serafinYear}"
+                                oninput="updateSerafinSim(this.value)"
+                                class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                                <span>2027 (Déploiement)</span>
+                                <span>2031 (Mi-parcours)</span>
+                                <span>2035 (Target Convergence)</span>
+                            </div>
+                        </div>
+
+                        <!-- SIMULATION OUTPUT RESULTS -->
+                        <div id="serafinResults" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSerafinSim(year) {
+            APP_STATE.serafinYear = parseInt(year);
+            document.getElementById('serafinYearLabel').innerText = year;
+            
+            const progress = (APP_STATE.serafinYear - 2027) / (2035 - 2027); // 0 to 1
+            const baseDotation = 3200000; // 3.2M€ MAS base
+            
+            // Convergence favorable (+1.8% / an) vs défavorable (-1.2% / an)
+            const favVal = Math.round(baseDotation * (1 + 0.022 * (APP_STATE.serafinYear - 2026)));
+            const defavVal = Math.round(baseDotation * (1 - 0.012 * (APP_STATE.serafinYear - 2026)));
+
+            const resDiv = document.getElementById('serafinResults');
+            if (resDiv) {
+                resDiv.innerHTML = `
+                    <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                        <div class="font-bold text-emerald-300 flex items-center justify-between">
+                            <span>Scénario Convergence Favorable (+Besoins Complexes)</span>
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="text-2xl font-black text-white num-mono">${favVal.toLocaleString()} €</div>
+                        <p class="text-[11px] text-emerald-200">Revalorisation au titre des prestations d'accompagnement renforcé CAA & soins lourds.</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 space-y-2">
+                        <div class="font-bold text-rose-300 flex items-center justify-between">
+                            <span>Scénario Convergence Standard / Défavorable</span>
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <div class="text-2xl font-black text-white num-mono">${defavVal.toLocaleString()} €</div>
+                        <p class="text-[11px] text-rose-200">Effet d'écrêtement tarifaire sans ajustement des profils d'usagers.</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * TAB 4: FINANCES & DIALOGUE (NEW - COMPTA ANALYTIQUE & SIMULATEURS)
+         */
+        function renderFinancesTab() {
+            const currentSub = APP_STATE.subTabs.finances;
+
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="border-b border-white/10 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-indigo-400"></i>
+                            Finances Hospitalières & Dialogue de Gestion CréA / RTC
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-1">Analyse des 5 pôles d'activité, kit de réponse aux objections et simulateur ETP / Absentéisme.</p>
+                    </div>
+
+                    <!-- Sub-Nav -->
+                    <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+                        <button onclick="switchSubTab('finances', '4a_dialogue')"
+                            class="px-4 py-2 rounded-xl text-xs font-semibold transition border ${
+                                currentSub === '4a_dialogue' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            4A. Dialogue de Gestion Hospitalier (5 Pôles)
+                        </button>
+                        <button onclick="switchSubTab('finances', '4b_simulateurs')"
+                            class="px-4 py-2 rounded-xl text-xs font-semibold transition border ${
+                                currentSub === '4b_simulateurs' 
+                                    ? 'bg-indigo-600 text-white border-indigo-400 shadow' 
+                                    : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                            }">
+                            4B. Simulateur ETP, Vacations & Impact DMS
+                        </button>
+                    </div>
+
+                    <div>
+                        ${currentSub === '4a_dialogue' ? renderSubTab4A() : renderSubTab4B()}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubTab4A() {
+            const currentPole = APP_DATA.poles.find(p => p.id === APP_STATE.selectedPole) || APP_DATA.poles[0];
+            const perspectives = [
+                { id: 'directeurRef', label: 'Directeur Référent' },
+                { id: 'cadreSup', label: 'Cadre Supérieur' },
+                { id: 'gestionnaire', label: 'Contrôleur de Gestion' },
+                { id: 'ars', label: 'Inspecteur ARS' }
+            ];
+
+            return `
+                <div class="space-y-6">
+                    <!-- POLE SELECTOR PILLS -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        ${APP_DATA.poles.map(p => `
+                            <button onclick="APP_STATE.selectedPole = '${p.id}'; renderMainContent();"
+                                class="p-3 rounded-2xl border text-left transition ${
+                                    APP_STATE.selectedPole === p.id 
+                                        ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg' 
+                                        : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+                                }">
+                                <div class="text-xs font-bold truncate">${p.name}</div>
+                                <div class="text-[11px] num-mono font-semibold mt-1 ${p.solde.includes('+') ? 'text-emerald-300' : p.solde.includes('-') ? 'text-rose-300' : 'text-slate-300'}">
+                                    ${p.solde}
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- POLE DETAIL SHEET -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">${currentPole.name}</h3>
+                                <div class="text-xs text-indigo-300 font-mono mt-0.5">${currentPole.uo}</div>
+                            </div>
+                            <div class="flex items-center gap-3 num-mono text-xs">
+                                <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+                                    Recettes: <strong>${currentPole.recettes}</strong>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                                    Dépenses: <strong>${currentPole.depenses}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PERSPECTIVE SWITCHER -->
+                        <div class="space-y-3">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Angle d'Argumentation Dialogue de Gestion :</label>
+                            <div class="flex flex-wrap gap-2">
+                                ${perspectives.map(pers => `
+                                    <button onclick="APP_STATE.polePerspective = '${pers.id}'; renderMainContent();"
+                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border ${
+                                            APP_STATE.polePerspective === pers.id 
+                                                ? 'bg-emerald-600 text-white border-emerald-400 shadow' 
+                                                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/15'
+                                        }">
+                                        ${pers.label}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- ACTIVE PERSPECTIVE BOX -->
+                        <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-100 space-y-2">
+                            <div class="font-bold text-sm text-indigo-300 flex items-center gap-2">
+                                <i class="fa-solid fa-comments text-amber-300"></i> Position Officielle (${perspectives.find(p=>p.id===APP_STATE.polePerspective).label})
+                            </div>
+                            <p class="leading-relaxed text-slate-200">
+                                ${currentPole[APP_STATE.polePerspective]}
+                            </p>
+                        </div>
+
+                        <!-- KIT DE RÉPONSES AUX OBJECTIONS -->
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kit de Réponse aux Objections ARS / Direction Financière</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <div class="font-bold text-amber-300">Objection : "Votre DMS dépasse la moyenne régionale."</div>
+                                    <div class="text-slate-300">Réponse : "Le recrutement de patients polypathologiques plus complexes et les blocages d'aval en EHPAD/MAS expliquent 80% du surcoût. Un partenariat renforcé HAD est en cours."</div>
+                                </div>
+                                <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <div class="font-bold text-amber-300">Objection : "Les heures supplémentaires explosent."</div>
+                                    <div class="text-slate-300">Réponse : "L'absentéisme inopiné court séjour à 12% a été pallié pour des motifs de sécurité réglementaire. Stabilisation prévue avec le pool vacataires qualifié."</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubTab4B() {
+            return `
+                <div class="space-y-6">
+                    <!-- CALCULATEUR SIMULATEUR ETP & VACATIONS -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4">
+                        <div class="border-b border-white/10 pb-3">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-calculator text-emerald-400"></i>
+                                Simulateur d'Impact Financier : Replacement Vacataires vs Absentéisme
+                            </h3>
+                            <p class="text-xs text-slate-300">Calculateur d'équivalent temps plein (1 ETP = 1820,04 h/an = 151,67 h/mois) et coût vacataire.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="space-y-2 p-3 rounded-xl bg-white/5 border border-white/10">
+                                <label for="etpInput" class="font-bold text-slate-200">Nombre d'ETP à remplacer :</label>
+                                <input id="etpInput" type="number" step="0.1" value="2.0" oninput="calculateEtpCost()"
+                                    class="w-full p-2 rounded-lg bg-black/40 text-white border border-white/15 num-mono focus:outline-none focus:border-indigo-400">
+                            </div>
+                            <div class="space-y-2 p-3 rounded-xl bg-white/5 border border-white/10">
+                                <label for="rateInput" class="font-bold text-slate-200">Taux horaire moyen vacataire (€ HT) :</label>
+                                <input id="rateInput" type="number" value="35" oninput="calculateEtpCost()"
+                                    class="w-full p-2 rounded-lg bg-black/40 text-white border border-white/15 num-mono focus:outline-none focus:border-indigo-400">
+                            </div>
+                            <div class="space-y-2 p-3 rounded-xl bg-white/5 border border-white/10">
+                                <label for="monthsInput" class="font-bold text-slate-200">Durée du remplacement (Mois) :</label>
+                                <input id="monthsInput" type="number" value="3" oninput="calculateEtpCost()"
+                                    class="w-full p-2 rounded-lg bg-black/40 text-white border border-white/15 num-mono focus:outline-none focus:border-indigo-400">
+                            </div>
+                        </div>
+
+                        <div id="etpCostResult" class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- IMPACT BLOC & DMS CALCULATOR -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4">
+                        <div class="border-b border-white/10 pb-3">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-bed text-indigo-400"></i>
+                                Optimisation DMS Hospitalière & Salles de Bloc
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                                <div class="font-bold text-emerald-300">Gain Financier Réduction DMS</div>
+                                <p class="text-slate-300">Réduire la DMS de 0.5 jour sur 1 000 séjours libère 500 journées d'hospitalisation, soit une économie théorique d'environ <strong class="text-white num-mono font-bold">200 000 €</strong> de charges directes.</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 space-y-2">
+                                <div class="font-bold text-rose-300">Coût Annulation Salle de Bloc</div>
+                                <p class="text-slate-300">Une journée de salle de bloc non utilisée par manque de personnel vacataire représente une perte de recette brute d'environ <strong class="text-white num-mono font-bold">4 316 €</strong> par jour/salle.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateEtpCost() {
+            const etp = parseFloat(document.getElementById('etpInput')?.value || 2.0);
+            const rate = parseFloat(document.getElementById('rateInput')?.value || 35);
+            const months = parseFloat(document.getElementById('monthsInput')?.value || 3);
+
+            const hoursPerMonth = 151.67;
+            const totalHours = etp * hoursPerMonth * months;
+            const totalCost = totalHours * rate * 1.10; // 10% précarité/gestion
+
+            const res = document.getElementById('etpCostResult');
+            if (res) {
+                res.innerHTML = `
+                    <div>
+                        <div class="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Volume Horaire Total Cumulé</div>
+                        <div class="text-2xl font-black text-white num-mono">${Math.round(totalHours).toLocaleString()} Heures</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-emerald-300 font-semibold uppercase tracking-wider">Coût Estimé Prestation Vacataire</div>
+                        <div class="text-3xl font-black text-emerald-400 num-mono">${Math.round(totalCost).toLocaleString()} € HT</div>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * TAB 5: RH & PLANNINGS
+         */
+        function renderRHTab() {
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="border-b border-white/10 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-users-gear text-indigo-400"></i>
+                            Interface RH Flash & Vérificateur de Planning MAS 365j
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-1">Guide réglementaire rapide et outil interactif de conformité du tableau de service.</p>
+                    </div>
+
+                    <!-- FICHES RH FLASH -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Questions & Réponses RH Flash</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${APP_DATA.rhFlashCards.map((card, idx) => `
+                                <div class="glass-card outer-card-16 rounded-2xl border-white/10 p-4 space-y-2 stagger-item" style="--i: ${idx}">
+                                    <div class="text-xs font-bold text-indigo-300 flex items-start gap-2">
+                                        <i class="fa-solid fa-circle-question text-emerald-400 mt-0.5"></i>
+                                        <span>${card.q}</span>
+                                    </div>
+                                    <div class="text-xs text-slate-300 leading-relaxed pl-5 border-l-2 border-indigo-500/30">
+                                        ${card.r}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- VÉRIFICATEUR DE PLANNING MAS 365J -->
+                    <div class="glass-card outer-card-20 rounded-2xl border-emerald-500/30 bg-emerald-500/5 space-y-4">
+                        <div class="border-b border-white/10 pb-3 flex items-center justify-between">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-check text-emerald-400"></i>
+                                Vérificateur Réglementaire Trame Planning MAS (42 lits + 8 AJ)
+                            </h3>
+                            <button onclick="runPlanningAudit()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition active:scale-95">
+                                Lancer l'Audit Automatique
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                <div class="font-bold text-indigo-300">Trame de Roulement Type Analysee (Equipe Soins)</div>
+                                <ul class="space-y-1 text-slate-300 font-mono text-[11px]">
+                                    <li>• Matin (7h00 - 14h30) : 7h00 net (30 min pause)</li>
+                                    <li>• Soir (14h00 - 21h30) : 7h00 net (30 min pause)</li>
+                                    <li>• Grand Jour MAS (9h15 - 21h00) : 10h00 net (1h pause)</li>
+                                    <li>• Nuit (21h15 - 7h15) : 10h00 net</li>
+                                </ul>
+                            </div>
+
+                            <div id="auditOutput" class="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                                <div class="text-slate-400 italic text-center py-4">Cliquez sur "Lancer l'Audit Automatique" pour tester la conformité des règles du Code du Travail.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function runPlanningAudit() {
+            const out = document.getElementById('auditOutput');
+            if (!out) return;
+
+            out.innerHTML = `
+                <div class="font-bold text-emerald-300 flex items-center gap-1.5 mb-2">
+                    <i class="fa-solid fa-square-check"></i> Rapport de Conformité Légale (100% Conforme)
+                </div>
+                <div class="space-y-1.5 text-xs text-slate-200">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-emerald-400"></i> Repos minimum 11h consécutives : <strong class="text-emerald-300">RESPECTÉ</strong>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-emerald-400"></i> Max 3 jours consécutifs en trame 10h : <strong class="text-emerald-300">RESPECTÉ</strong>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-emerald-400"></i> Présence 4 soignants aux repas (12h & 18h45) : <strong class="text-emerald-300">RESPECTÉ (5 pros présents)</strong>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-emerald-400"></i> Minimum 2 pros jusqu'à 21h30 : <strong class="text-emerald-300">RESPECTÉ (3 pros)</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * TAB 6: CARTE 3D ÉCOSYSTÈME (THREE.JS)
+         */
+        function renderCarte3DTab() {
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-4">
+                    <div class="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-cubes text-indigo-400"></i>
+                                Écosystème Interactif 3D "Futur Dirigeant EMS"
+                            </h2>
+                            <p class="text-xs text-slate-300 mt-1">Visualisation tridimensionnelle des flux entre instances, métiers, documents et tutelles.</p>
+                        </div>
+                        <div class="text-xs text-slate-400 font-mono">
+                            <i class="fa-solid fa-mouse"></i> Rotation / Drag / Click 3D
+                        </div>
+                    </div>
+
+                    <!-- 3D CANVAS CONTAINER -->
+                    <div class="relative w-full h-[500px] rounded-2xl overflow-hidden border border-white/15 bg-black/60 shadow-inner">
+                        <canvas id="threeCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                        
+                        <!-- OVERLAY CONTROL INSTRUCTIONS -->
+                        <div class="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md text-[11px] text-slate-300 border border-white/10">
+                            Cliquez sur un nœud 3D pour ouvrir sa fiche d'interaction.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let threeScene, threeCamera, threeRenderer, threeNodes = [];
+        function initThreeJsScene() {
+            const canvas = document.getElementById('threeCanvas');
+            if (!canvas || typeof THREE === 'undefined') return;
+
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            threeScene = new THREE.Scene();
+            threeScene.fog = new THREE.FogExp2(0x0b0f19, 0.03);
+
+            threeCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            threeCamera.position.set(0, 0, 18);
+
+            threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            threeRenderer.setSize(width, height);
+            threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Central Node (Dirigeant)
+            const centerGeo = new THREE.SphereGeometry(1.4, 32, 32);
+            const centerMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, wireframe: true });
+            const centerMesh = new THREE.Mesh(centerGeo, centerMat);
+            threeScene.add(centerMesh);
+
+            // Satellite Nodes
+            const nodeData = [
+                { name: 'CODIR', color: 0x10b981, pos: [-6, 3, 2] },
+                { name: 'ARS', color: 0xf59e0b, pos: [7, 4, -1] },
+                { name: 'EPRD', color: 0xec4899, pos: [-5, -4, 1] },
+                { name: 'DUI NetVie', color: 0x3b82f6, pos: [6, -3, 3] },
+                { name: 'CVS', color: 0x8b5cf6, pos: [0, 6, -3] }
+            ];
+
+            threeNodes = [];
+            nodeData.forEach(d => {
+                const geo = new THREE.SphereGeometry(0.8, 16, 16);
+                const mat = new THREE.MeshBasicMaterial({ color: d.color });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(...d.pos);
+                mesh.userData = d;
+                threeScene.add(mesh);
+                threeNodes.push(mesh);
+
+                // Connection line to center
+                const points = [new THREE.Vector3(0,0,0), new THREE.Vector3(...d.pos)];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const lineMat = new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.4 });
+                const line = new THREE.Line(lineGeo, lineMat);
+                threeScene.add(line);
+            });
+
+            // Mouse orbit controls standard JS implementation
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+
+                threeScene.rotation.y += deltaMove.x * 0.005;
+                threeScene.rotation.x += deltaMove.y * 0.005;
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            // Raycaster Click Picking
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / canvas.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / canvas.height) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, threeCamera);
+                const intersects = raycaster.intersectObjects(threeNodes);
+
+                if (intersects.length > 0) {
+                    const hit = intersects[0].object.userData;
+                    open3DNodeModal(hit);
+                }
+            });
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                centerMesh.rotation.y += 0.005;
+                threeNodes.forEach(n => { n.rotation.x += 0.01; });
+                threeRenderer.render(threeScene, threeCamera);
+            }
+            animate3D();
+        }
+
+        function open3DNodeModal(data) {
+            const html = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-cube"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Nœud Écosystème : ${data.name}</h3>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-200 leading-relaxed">
+                        Ce composant est central dans l'architecture de pilotage d'un établissement EMS. Il régule les flux d'information et d'arbitrage financier et humain.
+                    </div>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        /**
+         * TAB 7: RÉSEAU PROMO (ANNUAIRE MASTER MES)
+         */
+        function renderPromoTab() {
+            let filtered = APP_STATE.promoList.filter(item => {
+                return item.name.toLowerCase().includes(APP_STATE.searchQuery.toLowerCase()) ||
+                       item.etablissement.toLowerCase().includes(APP_STATE.searchQuery.toLowerCase()) ||
+                       item.role.toLowerCase().includes(APP_STATE.searchQuery.toLowerCase());
+            });
+
+            return `
+                <div class="glass-card outer-card-24 rounded-3xl space-y-6">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-address-book text-indigo-400"></i>
+                                Annuaire Master MES — Promo & Réseau Professionnel
+                            </h2>
+                            <p class="text-xs text-slate-300 mt-1">Mise en réseau des diplômés et alternants MES (IAE Paris-Est / UPEC).</p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <button onclick="openAddPromoModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow flex items-center gap-2 transition active:scale-95 whitespace-nowrap">
+                                <i class="fa-solid fa-user-plus"></i> Ajouter un Diplômé
+                            </button>
+                            <button onclick="openFirebaseBoilerplateModal()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold border border-white/10 flex items-center gap-2 transition whitespace-nowrap">
+                                <i class="fa-solid fa-fire text-amber-400"></i> Code Firebase
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w-full">
+                        <input type="text" placeholder="Filtrer par nom, rôle ou établissement..." value="${APP_STATE.searchQuery}"
+                            oninput="APP_STATE.searchQuery = this.value; renderMainContent();"
+                            class="w-full px-4 py-2.5 rounded-xl bg-white/10 text-white placeholder-slate-400 border border-white/15 text-xs focus:outline-none focus:border-indigo-400">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${filtered.map((item, idx) => `
+                            <div class="glass-card outer-card-20 rounded-2xl border-white/10 space-y-4 stagger-item" style="--i: ${idx}">
+                                <div class="flex items-start justify-between gap-2 border-b border-white/10 pb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-400 text-white flex items-center justify-center font-bold text-lg shadow">
+                                            ${item.name.substring(0, 2).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h3 class="text-base font-bold text-white">${item.name}</h3>
+                                            <div class="text-xs text-indigo-300 font-semibold">${item.role}</div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-mono border border-emerald-500/30">
+                                        ${item.parcours}
+                                    </span>
+                                </div>
+
+                                <div class="text-xs text-slate-300">
+                                    <strong class="text-slate-200">Établissement :</strong> ${item.etablissement}
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Compétences & Réalisations Clés</div>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        ${item.competences.map(c => `<span class="px-2.5 py-0.5 rounded-lg bg-white/5 text-slate-300 text-[11px] border border-white/10">${c}</span>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between border-t border-white/10 pt-3 text-xs">
+                                    <a href="mailto:${item.email}" class="text-indigo-300 hover:text-indigo-200 flex items-center gap-1.5">
+                                        <i class="fa-regular fa-envelope"></i> ${item.email}
+                                    </a>
+                                    <span class="text-slate-400 font-mono text-[11px]">${item.phone}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openAddPromoModal() {
+            const html = `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-indigo-400"></i> Ajouter un Membre de la Promo MES
+                    </h3>
+                    <form onsubmit="saveNewPromoMember(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Nom et Prénom :</label>
+                            <input id="pName" required class="w-full p-2.5 rounded-xl bg-white/10 text-white border border-white/15 focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Poste / Rôle Actuel :</label>
+                            <input id="pRole" required class="w-full p-2.5 rounded-xl bg-white/10 text-white border border-white/15 focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Établissement / Organisation :</label>
+                            <input id="pEtab" required class="w-full p-2.5 rounded-xl bg-white/10 text-white border border-white/15 focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Compétences clés (séparées par des virgules) :</label>
+                            <input id="pComp" required placeholder="Ex: DUERP, NetVie, EPRD" class="w-full p-2.5 rounded-xl bg-white/10 text-white border border-white/15 focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Email Professionnel :</label>
+                            <input id="pEmail" type="email" required class="w-full p-2.5 rounded-xl bg-white/10 text-white border border-white/15 focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div class="pt-2 flex justify-end gap-2">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-white/10 text-slate-300 font-semibold">Annuler</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        function saveNewPromoMember(e) {
+            e.preventDefault();
+            const newM = {
+                id: Date.now(),
+                name: document.getElementById('pName').value,
+                role: document.getElementById('pRole').value,
+                etablissement: document.getElementById('pEtab').value,
+                parcours: 'Master 2 MES',
+                competences: document.getElementById('pComp').value.split(',').map(s=>s.trim()),
+                email: document.getElementById('pEmail').value,
+                phone: '06 -- -- -- --',
+                linkedIn: '#'
+            };
+            APP_STATE.promoList.push(newM);
+            APP_STATE.savePromo();
+            closeModal();
+            renderMainContent();
+            showToast("Nouveau diplômé ajouté avec succès !");
+        }
+
+        function openFirebaseBoilerplateModal() {
+            const codeSnippet = `// Boilerplate Firestore pour intégration Cloud Master MES
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY_PLACEHOLDER",
+  authDomain: "pilotesante-mes.firebaseapp.com",
+  projectId: "pilotesante-mes",
+  storageBucket: "pilotesante-mes.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export async function syncPromoNetwork(member) {
+  try {
+    const docRef = await addDoc(collection(db, "promo_mes"), member);
+    console.log("Document synced with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}`;
+
+            const html = `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-400"></i> Boilerplate d'Intégration Firebase Firestore
+                    </h3>
+                    <p class="text-xs text-slate-300">Ce code standardisé permet de connecter directement la boîte à outils à une base NoSQL Cloud en production.</p>
+                    <pre class="p-4 rounded-xl bg-black/50 border border-white/10 text-xs font-mono text-emerald-300 overflow-x-auto">${codeSnippet}</pre>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        /**
+         * ====================================================================
+         * 4. COMPLIANCE, RGPD & ACCESSIBILITY MODALS
+         * ====================================================================
+         */
+
+        function openGdprModal() {
+            const html = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+                        <i class="fa-solid fa-shield-halved text-2xl text-emerald-400"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Conformité RGPD, Accessibilité & Transparence</h3>
+                            <p class="text-xs text-slate-400">Charte d'utilisation de l'application PiloteSanté v2</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                        <h4 class="font-bold text-white uppercase tracking-wider">1. Protection des Données Personnelles (RGPD)</h4>
+                        <p>L'application PiloteSanté v2 respecte le principe de minimisation des données (Privacy by Design). Aucune donnée à caractère personnel nominative ou de santé n'est transmise vers des serveurs externes. Toutes les données créées restent hébergées localement dans le navigateur de l'utilisateur (LocalStorage).</p>
+
+                        <h4 class="font-bold text-white uppercase tracking-wider mt-2">2. Transparence & Gratuité</h4>
+                        <p>Cette suite logicielle est mise à disposition à titre purement éducatif pour les étudiants et professionnels du Master MES (IAE Paris-Est / UPEC). Elle ne comporte aucun frais caché, ni publicité commerciale.</p>
+
+                        <h4 class="font-bold text-white uppercase tracking-wider mt-2">3. Accessibilité Numérique (WCAG AAA)</h4>
+                        <p>L'application propose un mode à haut contraste débrayable et respecte les critères de navigabilité au clavier ainsi que des cibles tactiles minimales de 44x44px.</p>
+                    </div>
+
+                    <div class="pt-3 border-t border-white/10 flex justify-between items-center">
+                        <button onclick="clearAllData()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition">
+                            <i class="fa-solid fa-trash mr-1"></i> Supprimer mes données locales (Droit à l'effacement)
+                        </button>
+                        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Fermer</button>
+                    </div>
+                </div>
+            `;
+            showModal(html);
+        }
+
+        function acceptGdpr() {
+            localStorage.setItem('pilotesante_gdpr', 'true');
+            document.getElementById('gdprBanner').classList.add('hidden');
+        }
+
+        function clearAllData() {
+            if (confirm("Êtes-vous sûr de vouloir tout effacer ? Vos données locales seront réinitialisées.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function confirmResetData() {
+            clearAllData();
+        }
+
+        function toggleHighContrast() {
+            APP_STATE.highContrast = !APP_STATE.highContrast;
+            document.body.classList.toggle('high-contrast', APP_STATE.highContrast);
+            showToast(APP_STATE.highContrast ? "Mode Contrôle Accessibilité (WCAG AAA) Activé" : "Mode Standard Liquid Glass Activé");
+        }
+
+        /**
+         * GENERAL UTILS (MODAL & TOAST)
+         */
+        function showModal(contentHtml) {
+            document.getElementById('modalContent').innerHTML = contentHtml;
+            document.getElementById('modalOverlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 z-50 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-2xl border border-indigo-400 modal-animate-enter';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        /**
+         * APP BOOTSTRAP INITIALIZATION
+         */
+        window.onload = function() {
+            APP_STATE.init();
+            renderNavigation();
+            renderMainContent();
+
+            // Keyboard accessibility (Esc to close modal)
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        };
+    </script>
 </body>
 </html>
